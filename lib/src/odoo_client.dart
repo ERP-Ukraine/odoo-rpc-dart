@@ -1,3 +1,5 @@
+/// Odoo JSON-RPC Client for authentication and method calls.
+
 import 'dart:convert';
 import 'dart:async';
 import 'dart:core';
@@ -5,7 +7,10 @@ import 'package:uuid/uuid.dart';
 import 'package:validators/validators.dart';
 import 'package:http/http.dart' as http;
 
+
+/// Generic exception thrown on error coming from Odoo server.
 class OdooException implements Exception {
+  /// Exception message coming from Odoo server.
   String message;
   OdooException(this.message);
 
@@ -13,7 +18,9 @@ class OdooException implements Exception {
   String toString() => 'OdooException: $message';
 }
 
+/// Exception for session expired error.
 class OdooSessionExpiredException extends OdooException {
+  /// Exception message coming from Odoo server.
   String message;
   OdooSessionExpiredException(this.message) : super(message);
 
@@ -21,13 +28,27 @@ class OdooSessionExpiredException extends OdooException {
   String toString() => 'OdooSessionExpiredException: $message';
 }
 
+/// Odoo client for making RPC calls.
 class OdooClient {
+  /// Odoo server URL in format proto://domain:port
   String baseURL;
+  /// Stores current session_id that is coming from responce cookies.
+  /// Odoo server will issue new session for each call as we do cross-orgin requests.
+  /// Session token can be retrived with SessionId getter.
   String _sessionId;
+  /// Tells where we shouuld send session change events to a stream.
+  /// Activates when there are some listeners.
   bool _sessionStreamActive;
+  /// Session change events stream controller
   StreamController<String> _sessionStreamController;
+  /// HTTP client instance. By default instantiated with [http.Client].
+  /// Cound be owerriden for tests or custom client configuration.
   http.BaseClient httpClient;
 
+  /// Instantiates [OdooClient] with given Odoo server URL.
+  /// Optionally accepts [sessionId] to reuse existing session.
+  /// It is possible to pass own [httpClient] inherited
+  /// from [http.BaseClient] to override default one.
   OdooClient(String baseURL,
       [String sessionId = '', http.BaseClient httpClient]) {
     // Restore previous session
@@ -57,11 +78,13 @@ class OdooClient {
 
   void _stopStream() => _sessionStreamActive = false;
 
+  /// Returns current session token
   String get sesionId => this._sessionId;
 
+  /// Returns stream of session changed events
   Stream<String> get sessionStream => _sessionStreamController.stream;
 
-  // Free HTTP client resources
+  /// Frees HTTP client resources
   void close() {
     if (httpClient != null) {
       httpClient.close();
@@ -85,8 +108,8 @@ class OdooClient {
     }
   }
 
-  // Low Level RPC call.
-  // It has to be used on all Odoo Controllers with type='json'
+  /// Low Level RPC call.
+  /// It has to be used on all Odoo Controllers with type='json'
   Future<dynamic> callRPC(path, funcName, params) async {
     var headers = {'Content-type': 'application/json'};
 
@@ -124,21 +147,29 @@ class OdooClient {
     return result;
   }
 
+  /// Calls any public method on a model.
+  ///
+  /// Throws [OdooException] on any error on Odoo server side.
+  /// Throws [OdooSessionExpiredException] when session is expired or not valid.
   Future<dynamic> callKw(params) async {
     return callRPC('/web/dataset/call_kw', 'call', params);
   }
 
+  /// Authenticate user for given database.
+  /// This call receives valid session on successful login
+  /// which we be reused for future RPC calls.
   Future<dynamic> authenticate(String db, String login, String password) async {
     var params = {'db': db, 'login': login, 'password': password};
     return callRPC('/web/session/authenticate', 'call', params);
   }
 
-  // raises OdooSessionExpiredException if already destoyed
+  /// Destory current session.
+  /// Throws [OdooSessionExpiredException] if already destoyed.
   Future<dynamic> destroySession() async {
     return callRPC('/web/session/destroy', 'call', {});
   }
-
-  // raises OdooSessionExpiredException if session is not valid
+  /// Checks if current session is valid.
+  /// Throws [OdooSessionExpiredException] if session is not valid.
   Future<dynamic> checkSession() async {
     return callRPC('/web/session/check', 'call', {});
   }

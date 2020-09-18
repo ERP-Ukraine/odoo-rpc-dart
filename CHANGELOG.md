@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.1.3
+
+Added dartdoc comments for public methods.
+
 ## 0.1.2
 
 Fixed indents in Readme file
