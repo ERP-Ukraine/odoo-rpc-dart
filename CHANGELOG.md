@@ -1,4 +1,10 @@
-# 0.1.0
+# odoo_prc changelog
+
+## 0.1.1
+
+Updated package layout according to guidelines
+
+## 0.1.0
 
 Initial Version of the library.
 
