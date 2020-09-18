@@ -99,7 +99,7 @@ class OdooClient {
       'jsonrpc': '2.0',
       'method': 'funcName',
       'params': params,
-      'id': new Uuid().v1()
+      'id': Uuid().v1()
     });
 
     final response = await httpClient.post(url, body: body, headers: headers);
