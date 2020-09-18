@@ -29,7 +29,7 @@ class OdooClient {
   http.BaseClient httpClient;
 
   OdooClient(String baseURL,
-      [String sessionId = '', http.BaseClient httpClient = null]) {
+      [String sessionId = '', http.BaseClient httpClient]) {
     // Restore previous session
     this._sessionId = sessionId;
     // Take or init HTTP client
