@@ -7,7 +7,6 @@ import 'package:uuid/uuid.dart';
 import 'package:validators/validators.dart';
 import 'package:http/http.dart' as http;
 
-
 /// Generic exception thrown on error coming from Odoo server.
 class OdooException implements Exception {
   /// Exception message coming from Odoo server.
@@ -32,15 +31,19 @@ class OdooSessionExpiredException extends OdooException {
 class OdooClient {
   /// Odoo server URL in format proto://domain:port
   String baseURL;
+
   /// Stores current session_id that is coming from responce cookies.
   /// Odoo server will issue new session for each call as we do cross-orgin requests.
   /// Session token can be retrived with SessionId getter.
   String _sessionId;
+
   /// Tells where we shouuld send session change events to a stream.
   /// Activates when there are some listeners.
   bool _sessionStreamActive;
+
   /// Session change events stream controller
   StreamController<String> _sessionStreamController;
+
   /// HTTP client instance. By default instantiated with [http.Client].
   /// Cound be owerriden for tests or custom client configuration.
   http.BaseClient httpClient;
@@ -168,6 +171,7 @@ class OdooClient {
   Future<dynamic> destroySession() async {
     return callRPC('/web/session/destroy', 'call', {});
   }
+
   /// Checks if current session is valid.
   /// Throws [OdooSessionExpiredException] if session is not valid.
   Future<dynamic> checkSession() async {

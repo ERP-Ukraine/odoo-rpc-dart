@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.1.4
+
+Format code with dartfmt.
+
 ## 0.1.3
 
 Added dartdoc comments for public methods.
