@@ -30,8 +30,8 @@ import 'dart:io';
 import 'packages:odoo_rpc/odoo_rpc.dart'
 
 main() async {
-var client = OdooClient("https://my-db.odoo.com");
-try {
+  var client = OdooClient("https://my-db.odoo.com");
+  try {
     var res = await client.authenticate('my-db', 'admin', 'admin');
     res = await client.callRPC('/web/session/modules', 'call', {});
     print('Installed modules: \n' + res.toString());
@@ -60,7 +60,7 @@ sessionChanged(String sessionId) async {
 main() async {
   var prev_session = restore_session_somehow();
   var client = OdooClient("https://my-db.odoo.com", prev_session);
-}
+
   // Subscribe to session changes to store most recent one
   var subscription = client.sessionStream.listen(sessionChanged);
 
@@ -86,6 +86,7 @@ main() async {
 
   subscription.cancel();
   client.close();
+}
 ```
 
 See example folder for more complete example.

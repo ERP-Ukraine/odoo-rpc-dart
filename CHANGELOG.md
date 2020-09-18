@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.1.2
+
+Fixed indents in Readme file
+
 ## 0.1.1
 
 Updated package layout according to guidelines
