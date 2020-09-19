@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.1.5
+
+Fixed sessionId getter typo.
+
 ## 0.1.4
 
 Format code with dartfmt.

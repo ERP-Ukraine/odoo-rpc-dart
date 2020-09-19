@@ -48,7 +48,7 @@ void main() {
           http_testing.MockClient(fakeRequestHandlerBuilder(200));
       var client = OdooClient(
           'https://demo.erp.co.ua', 'initial session', mockHttpClient);
-      expect(client.sesionId, equals('initial session'));
+      expect(client.sessionId, equals('initial session'));
     });
     test('Test refreshing session', () async {
       var mockHttpClient =
@@ -57,13 +57,13 @@ void main() {
       var client = OdooClient(
           'https://demo.erp.co.ua', 'initial session', mockHttpClient);
 
-      expect(client.sesionId, equals('initial session'));
+      expect(client.sessionId, equals('initial session'));
 
       final String expectedSessionId = checksum('/some/path');
       var expectForEvent =
           expectLater(client.sessionStream, emits(expectedSessionId));
       await client.callRPC('/some/path', 'funcName', {});
-      expect(client.sesionId, equals(expectedSessionId));
+      expect(client.sessionId, equals(expectedSessionId));
       await expectForEvent;
     });
     test('Test expired session exception', () {

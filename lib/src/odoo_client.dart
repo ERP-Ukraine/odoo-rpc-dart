@@ -82,7 +82,7 @@ class OdooClient {
   void _stopStream() => _sessionStreamActive = false;
 
   /// Returns current session token
-  String get sesionId => this._sessionId;
+  String get sessionId => this._sessionId;
 
   /// Returns stream of session changed events
   Stream<String> get sessionStream => _sessionStreamController.stream;
