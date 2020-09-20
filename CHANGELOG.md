@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.1
+
+Updated the example with search_read call.
+
 ## 0.2.0
 
 Introduced OdooSession object.

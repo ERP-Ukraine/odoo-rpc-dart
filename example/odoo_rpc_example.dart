@@ -9,7 +9,8 @@ sessionChanged(OdooSession sessionId) async {
 
 main() async {
   // Restore session ID from storage and pass it to client constructor.
-  final client = OdooClient("https://demo.odoo.com");
+  final baseUrl = 'https://demo.odoo.com';
+  final client = OdooClient(baseUrl);
   // Subscribe to session changes to store most recent one
   var subscription = client.sessionStream.listen(sessionChanged);
 
@@ -17,8 +18,30 @@ main() async {
     final session = await client.authenticate('odoo', 'admin', 'admin');
     print(session);
     print('Authenticated');
-
-    var res = await client.callRPC('/web/session/modules', 'call', {});
+    final image_field =
+        session.serverVersion >= 13 ? 'image_128' : 'image_small';
+    var res = await client.callKw({
+      'model': 'res.users',
+      'method': 'search_read',
+      'args': [],
+      'kwargs': {
+        'context': {'bin_size': true},
+        'domain': [
+          ['id', '=', session.userId]
+        ],
+        'fields': ['id', 'name', '__last_update', image_field],
+      },
+    });
+    print('\nUser info: \n' + res.toString()) as List<dynamic>;
+    final uid = session.userId;
+    if (res.length == 1) {
+      var unique = res[0]['__last_update'] as String;
+      unique = unique.replaceAll(new RegExp(r'[^0-9]'), '');
+      final user_avatar =
+          '$baseUrl/web/image?model=res.user&field=$image_field&id=$uid&unique=$unique';
+      print('User Avatar URL: $user_avatar');
+    }
+    res = await client.callRPC('/web/session/modules', 'call', {});
     print('\nInstalled modules: \n' + res.toString());
 
     print('\nChecking session while logged in');
