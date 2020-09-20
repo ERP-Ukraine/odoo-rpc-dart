@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.1.6
+
+Fixed more typos.
+
 ## 0.1.5
 
 Fixed sessionId getter typo.

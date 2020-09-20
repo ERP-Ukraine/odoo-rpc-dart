@@ -33,11 +33,11 @@ class OdooClient {
   String baseURL;
 
   /// Stores current session_id that is coming from responce cookies.
-  /// Odoo server will issue new session for each call as we do cross-orgin requests.
+  /// Odoo server will issue new session for each call as we do cross-origin requests.
   /// Session token can be retrived with SessionId getter.
   String _sessionId;
 
-  /// Tells where we shouuld send session change events to a stream.
+  /// Tells whether we should send session change events to a stream.
   /// Activates when there are some listeners.
   bool _sessionStreamActive;
 
@@ -45,7 +45,7 @@ class OdooClient {
   StreamController<String> _sessionStreamController;
 
   /// HTTP client instance. By default instantiated with [http.Client].
-  /// Cound be owerriden for tests or custom client configuration.
+  /// Could be overridden for tests or custom client configuration.
   http.BaseClient httpClient;
 
   /// Instantiates [OdooClient] with given Odoo server URL.
@@ -104,7 +104,7 @@ class OdooClient {
       if (sessionCookie.split('=').length == 2) {
         _sessionId = sessionCookie.split('=')[1];
         if (_sessionStreamActive) {
-          // Send new session to listners
+          // Send new session to listeners
           _sessionStreamController.add(_sessionId);
         }
       }
@@ -136,7 +136,7 @@ class OdooClient {
         // session expired
         _sessionId = '';
         if (_sessionStreamActive) {
-          // Send new session to listners
+          // Send new session to listeners
           _sessionStreamController.add(_sessionId);
         }
         final err = result['error'].toString();

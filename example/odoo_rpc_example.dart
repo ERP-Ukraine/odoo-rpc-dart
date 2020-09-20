@@ -8,7 +8,7 @@ sessionChanged(String sessionId) async {
 }
 
 main() async {
-  // Restore sesion ID from storage and pass it to client constructor.
+  // Restore session ID from storage and pass it to client constructor.
   var client = OdooClient("https://demo.odoo.com");
   // Subscribe to session changes to store most recent one
   var subscription = client.sessionStream.listen(sessionChanged);
@@ -25,7 +25,7 @@ main() async {
     res = await client.checkSession();
     print(res);
 
-    print('\nDestroing session');
+    print('\nDestroying session');
     res = await client.destroySession();
     print(res);
   } on OdooException catch (e) {
