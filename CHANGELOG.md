@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.0
+
+Introduced OdooSession object.
+
 ## 0.1.7
 
 Now session is destroyed even on network error.

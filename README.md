@@ -4,13 +4,13 @@ Odoo RPC Client Library for Dart.
 
 ## Features
 
-- initialize client with previously stored `session_id`
-- authenticate via database name, login and password
-- issue JSON-RPC requests to JSON controllers
-- execute methods via call_kw
-- get `session_id` updates via stream
-- terminate session (logout)
-- catch exceptions when session expires
+- Initialize client with previously stored Odoo Session.
+- Authenticate via database name, login and password.
+- Issue JSON-RPC requests to JSON controllers.
+- Execute public methods via `CallKw`.
+- Get Odoo Session updates via stream.
+- Terminate session (logout).
+- Catch exceptions when session expires.
 
 ## Usage
 
@@ -18,7 +18,7 @@ To use this plugin, add odoo_rpc as a dependency in your pubspec.yaml file. For 
 
 ```yaml
 dependencies:
-  odoo_rpc: ^0.1.7
+  odoo_rpc: ^0.2.0
 ```
 
 ## Examples
@@ -30,10 +30,10 @@ import 'dart:io';
 import 'packages:odoo_rpc/odoo_rpc.dart'
 
 main() async {
-  var client = OdooClient("https://my-db.odoo.com");
+  final client = OdooClient('https://my-db.odoo.com');
   try {
-    var res = await client.authenticate('my-db', 'admin', 'admin');
-    res = await client.callRPC('/web/session/modules', 'call', {});
+    await client.authenticate('my-db', 'admin', 'admin');
+    final res = await client.callRPC('/web/session/modules', 'call', {});
     print('Installed modules: \n' + res.toString());
   } on OdooException catch (e) {
     print(e);
@@ -51,9 +51,9 @@ import 'dart:io';
 import 'packages:odoo_rpc/odoo_rpc.dart'
 
 
-sessionChanged(String sessionId) async {
-  print('We got new session ID: ' + sessionId);
-  store_session_somehow(sessionId)
+sessionChanged(OdooSession sessionId) async {
+  print('We got new session ID: ' + sessionId.id);
+  store_session_somehow(sessionId);
 }
 
 
@@ -65,8 +65,8 @@ main() async {
   var subscription = client.sessionStream.listen(sessionChanged);
 
   try {
-    var res = await client.authenticate('my-db', 'admin', 'admin');
-    res = await client.callRPC('/web/session/modules', 'call', {});
+    final session = await client.authenticate('my-db', 'admin', 'admin');
+    var res = await client.callRPC('/web/session/modules', 'call', {});
     print('Installed modules: \n' + res.toString());
 
     // logout

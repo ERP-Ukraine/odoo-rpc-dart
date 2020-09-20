@@ -3,29 +3,13 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:core';
+
 import 'package:uuid/uuid.dart';
 import 'package:validators/validators.dart';
 import 'package:http/http.dart' as http;
 
-/// Generic exception thrown on error coming from Odoo server.
-class OdooException implements Exception {
-  /// Exception message coming from Odoo server.
-  String message;
-  OdooException(this.message);
-
-  @override
-  String toString() => 'OdooException: $message';
-}
-
-/// Exception for session expired error.
-class OdooSessionExpiredException extends OdooException {
-  /// Exception message coming from Odoo server.
-  String message;
-  OdooSessionExpiredException(this.message) : super(message);
-
-  @override
-  String toString() => 'OdooSessionExpiredException: $message';
-}
+import 'odoo_exceptions.dart';
+import 'odoo_session.dart';
 
 /// Odoo client for making RPC calls.
 class OdooClient {
@@ -35,14 +19,14 @@ class OdooClient {
   /// Stores current session_id that is coming from responce cookies.
   /// Odoo server will issue new session for each call as we do cross-origin requests.
   /// Session token can be retrived with SessionId getter.
-  String _sessionId;
+  OdooSession _sessionId;
 
   /// Tells whether we should send session change events to a stream.
   /// Activates when there are some listeners.
   bool _sessionStreamActive;
 
   /// Session change events stream controller
-  StreamController<String> _sessionStreamController;
+  StreamController<OdooSession> _sessionStreamController;
 
   /// HTTP client instance. By default instantiated with [http.Client].
   /// Could be overridden for tests or custom client configuration.
@@ -53,7 +37,7 @@ class OdooClient {
   /// It is possible to pass own [httpClient] inherited
   /// from [http.BaseClient] to override default one.
   OdooClient(String baseURL,
-      [String sessionId = '', http.BaseClient httpClient]) {
+      [OdooSession sessionId, http.BaseClient httpClient]) {
     // Restore previous session
     this._sessionId = sessionId;
     // Take or init HTTP client
@@ -70,7 +54,7 @@ class OdooClient {
 
     // Disable stream until we get listeners
     this._sessionStreamActive = false;
-    this._sessionStreamController = StreamController<String>(
+    this._sessionStreamController = StreamController<OdooSession>(
         onListen: _startSteam,
         onPause: _stopStream,
         onResume: _startSteam,
@@ -81,11 +65,11 @@ class OdooClient {
 
   void _stopStream() => _sessionStreamActive = false;
 
-  /// Returns current session token
-  String get sessionId => this._sessionId;
+  /// Returns current session
+  OdooSession get sessionId => this._sessionId;
 
   /// Returns stream of session changed events
-  Stream<String> get sessionStream => _sessionStreamController.stream;
+  Stream<OdooSession> get sessionStream => _sessionStreamController.stream;
 
   /// Frees HTTP client resources
   void close() {
@@ -94,19 +78,28 @@ class OdooClient {
     }
   }
 
-  // Take new session from cookies
-  void _updateSessionId(http.Response response) {
+  void _setSessionId(String newSession) {
+    // Update session if exists
+    if (_sessionId != null) {
+      // session expired
+      _sessionId = _sessionId.updateSessionId(newSession);
+      if (_sessionStreamActive) {
+        // Send new session to listeners
+        _sessionStreamController.add(_sessionId);
+      }
+    }
+  }
+
+  // Take new session from cookies and update session instance
+  void _updateSessionIdFromCookies(http.Response response) {
     String rawCookie = response.headers['set-cookie'];
     if (rawCookie != null) {
       int index = rawCookie.indexOf(';');
       var sessionCookie =
           (index == -1) ? rawCookie : rawCookie.substring(0, index);
       if (sessionCookie.split('=').length == 2) {
-        _sessionId = sessionCookie.split('=')[1];
-        if (_sessionStreamActive) {
-          // Send new session to listeners
-          _sessionStreamController.add(_sessionId);
-        }
+        final newSessionId = sessionCookie.split('=')[1];
+        _setSessionId(newSessionId);
       }
     }
   }
@@ -117,7 +110,7 @@ class OdooClient {
     var headers = {'Content-type': 'application/json'};
 
     if (_sessionId != null) {
-      headers['Cookie'] = "session_id=" + _sessionId;
+      headers['Cookie'] = 'session_id=' + _sessionId.id;
     }
 
     var url = baseURL + path;
@@ -129,16 +122,12 @@ class OdooClient {
     });
 
     final response = await httpClient.post(url, body: body, headers: headers);
-    _updateSessionId(response);
+    _updateSessionIdFromCookies(response);
     var result = json.decode(response.body);
     if (result['error'] != null) {
       if (result['error']['code'] == 100) {
         // session expired
-        _sessionId = '';
-        if (_sessionStreamActive) {
-          // Send new session to listeners
-          _sessionStreamController.add(_sessionId);
-        }
+        _setSessionId('');
         final err = result['error'].toString();
         throw OdooSessionExpiredException(err);
       } else {
@@ -147,7 +136,7 @@ class OdooClient {
         throw OdooException(err);
       }
     }
-    return result;
+    return result['result'];
   }
 
   /// Calls any public method on a model.
@@ -161,9 +150,36 @@ class OdooClient {
   /// Authenticates user for given database.
   /// This call receives valid session on successful login
   /// which we be reused for future RPC calls.
-  Future<dynamic> authenticate(String db, String login, String password) async {
-    var params = {'db': db, 'login': login, 'password': password};
-    return callRPC('/web/session/authenticate', 'call', params);
+  Future<OdooSession> authenticate(
+      String db, String login, String password) async {
+    final params = {'db': db, 'login': login, 'password': password};
+    const headers = {'Content-type': 'application/json'};
+    final url = baseURL + '/web/session/authenticate';
+    final body = json.encode({
+      'jsonrpc': '2.0',
+      'method': 'call',
+      'params': params,
+      'id': Uuid().v1()
+    });
+
+    final response = await httpClient.post(url, body: body, headers: headers);
+    var result = json.decode(response.body);
+    if (result['error'] != null) {
+      if (result['error']['code'] == 100) {
+        // session expired
+        _setSessionId('');
+        final err = result['error'].toString();
+        throw OdooSessionExpiredException(err);
+      } else {
+        // Other error
+        final err = result['error'].toString();
+        throw OdooException(err);
+      }
+    }
+    _sessionId = OdooSession.fromSessionInfo(result['result']);
+    // It will notify subscribers
+    _updateSessionIdFromCookies(response);
+    return _sessionId;
   }
 
   /// Destroys current session.
@@ -172,13 +188,7 @@ class OdooClient {
       callRPC('/web/session/destroy', 'call', {});
     } on Exception {
       // If session is not cleared due to unknown error
-      if (_sessionId != '') {
-        _sessionId = '';
-        if (_sessionStreamActive) {
-          // Send new session to listeners
-          _sessionStreamController.add(_sessionId);
-        }
-      }
+      _setSessionId('');
     }
   }
 
