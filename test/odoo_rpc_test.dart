@@ -61,10 +61,12 @@ const OdooSession initialSession = OdooSession(
   userId: 2,
   partnerId: 3,
   companyId: 1,
+  userLogin: 'admin',
   userName: 'Mitchel Admin',
   userLang: 'en_US',
   userTz: 'Europe/Brussels',
   isSystem: true,
+  dbName: 'odoo',
   serverVersion: 13,
 );
 

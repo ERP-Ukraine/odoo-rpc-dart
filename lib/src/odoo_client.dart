@@ -185,7 +185,7 @@ class OdooClient {
   /// Destroys current session.
   Future<void> destroySession() async {
     try {
-      callRPC('/web/session/destroy', 'call', {});
+      await callRPC('/web/session/destroy', 'call', {});
     } on Exception {
       // If session is not cleared due to unknown error
       _setSessionId('');

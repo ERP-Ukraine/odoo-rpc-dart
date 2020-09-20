@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.2
+
+Added login and db name to session object.
+
 ## 0.2.1
 
 Updated the example with search_read call.
