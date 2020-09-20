@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.1.7
+
+Now session is destroyed even on network error.
+
 ## 0.1.6
 
 Fixed more typos.

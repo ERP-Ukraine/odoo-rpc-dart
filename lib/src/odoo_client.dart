@@ -158,7 +158,7 @@ class OdooClient {
     return callRPC('/web/dataset/call_kw', 'call', params);
   }
 
-  /// Authenticate user for given database.
+  /// Authenticates user for given database.
   /// This call receives valid session on successful login
   /// which we be reused for future RPC calls.
   Future<dynamic> authenticate(String db, String login, String password) async {
@@ -166,10 +166,20 @@ class OdooClient {
     return callRPC('/web/session/authenticate', 'call', params);
   }
 
-  /// Destory current session.
-  /// Throws [OdooSessionExpiredException] if already destoyed.
-  Future<dynamic> destroySession() async {
-    return callRPC('/web/session/destroy', 'call', {});
+  /// Destroys current session.
+  Future<void> destroySession() async {
+    try {
+      callRPC('/web/session/destroy', 'call', {});
+    } on Exception {
+      // If session is not cleared due to unknown error
+      if (_sessionId != '') {
+        _sessionId = '';
+        if (_sessionStreamActive) {
+          // Send new session to listeners
+          _sessionStreamController.add(_sessionId);
+        }
+      }
+    }
   }
 
   /// Checks if current session is valid.

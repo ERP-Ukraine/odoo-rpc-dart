@@ -26,7 +26,7 @@ main() async {
     print(res);
 
     print('\nDestroying session');
-    res = await client.destroySession();
+    await client.destroySession();
     print(res);
   } on OdooException catch (e) {
     print(e);
