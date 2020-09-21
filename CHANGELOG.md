@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.3
+
+Lower meta version dependency to make flutter_test happy.
+
 ## 0.2.2
 
 Added login and db name to session object.
