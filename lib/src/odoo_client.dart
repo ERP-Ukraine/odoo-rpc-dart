@@ -186,8 +186,13 @@ class OdooClient {
   Future<void> destroySession() async {
     try {
       await callRPC('/web/session/destroy', 'call', {});
+      // RPC call sets expired session.
+      // Need to overwrite it.
+      _setSessionId('');
     } on Exception {
-      // If session is not cleared due to unknown error
+      // If session is not cleared due to
+      // unknown error - clear it locally.
+      // Remote session will expire on its own.
       _setSessionId('');
     }
   }

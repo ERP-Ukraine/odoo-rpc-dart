@@ -1,5 +1,10 @@
 # odoo_prc changelog
 
+## 0.2.4
+
+Clear sessionId after logout.
+Final RPC call receives expired session in cookies.
+
 ## 0.2.3
 
 Lower meta version dependency to make flutter_test happy.
