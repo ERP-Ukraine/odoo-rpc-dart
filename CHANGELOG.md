@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.5
+
+Handle unsuccessful login for older Odoo versions.
+
 ## 0.2.4
 
 Clear sessionId after logout.
