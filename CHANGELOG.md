@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.6
+
+Session info may not have server info key.
+
 ## 0.2.5
 
 Handle unsuccessful login for older Odoo versions.

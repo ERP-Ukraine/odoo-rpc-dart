@@ -55,7 +55,10 @@ class OdooSession {
   /// Creates [OdooSession] instance from odoo session info object.
   static OdooSession fromSessionInfo(Map<String, Object> info) {
     final Map<String, Object> ctx = info['user_context'] as Map<String, Object>;
-    final List<dynamic> versionInfo = info['server_version_info'];
+    List<dynamic> versionInfo = [9];
+    if (info.containsKey('server_version_info')) {
+      versionInfo = info['server_version_info'];
+    }
     return OdooSession(
       id: info['id'] as String,
       userId: info['uid'] as int,

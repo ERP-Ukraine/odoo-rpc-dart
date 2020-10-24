@@ -178,7 +178,7 @@ class OdooClient {
     }
     // Odoo 11 sets uid to False on failed login without any error message
     if (result['result'].containsKey('uid')) {
-      if(result['result']['uid'] is bool){
+      if (result['result']['uid'] is bool) {
         throw OdooException('Authentication failed');
       }
     }
