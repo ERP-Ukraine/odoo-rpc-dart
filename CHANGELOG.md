@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.8
+
+Handle a case when user's timezone is false instead of String.
+
 ## 0.2.7
 
 Add example of how to create partner.
