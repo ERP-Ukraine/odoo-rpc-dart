@@ -18,7 +18,7 @@ To use this plugin, add odoo_rpc as a dependency in your pubspec.yaml file. For 
 
 ```yaml
 dependencies:
-  odoo_rpc: ^0.2.7
+  odoo_rpc: ^0.2.9
 ```
 
 ## Examples
@@ -27,7 +27,7 @@ Basic RPC-call
 
 ```dart
 import 'dart:io';
-import 'packages:odoo_rpc/odoo_rpc.dart'
+import 'package:odoo_rpc/odoo_rpc.dart'
 
 main() async {
   final client = OdooClient('https://my-db.odoo.com');
@@ -48,7 +48,7 @@ RPC-Calls with tracking session changes. Odoo server will issue new `session_id`
 
 ```dart
 import 'dart:io';
-import 'packages:odoo_rpc/odoo_rpc.dart'
+import 'package:odoo_rpc/odoo_rpc.dart'
 
 
 sessionChanged(OdooSession sessionId) async {

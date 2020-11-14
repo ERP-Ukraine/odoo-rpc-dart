@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.2.9
+
+Fix typos in README
+
 ## 0.2.8
 
 Handle a case when user's timezone is false instead of String.
