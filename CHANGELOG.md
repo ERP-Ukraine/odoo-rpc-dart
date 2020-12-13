@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.3.0
+
+Use broadcast stream for session update events
+
 ## 0.2.9
 
 Fix typos in README

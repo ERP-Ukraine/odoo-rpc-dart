@@ -54,10 +54,8 @@ class OdooClient {
 
     // Disable stream until we get listeners
     this._sessionStreamActive = false;
-    this._sessionStreamController = StreamController<OdooSession>(
+    this._sessionStreamController = StreamController<OdooSession>.broadcast(
         onListen: _startSteam,
-        onPause: _stopStream,
-        onResume: _startSteam,
         onCancel: _stopStream);
   }
 
@@ -80,8 +78,7 @@ class OdooClient {
 
   void _setSessionId(String newSession) {
     // Update session if exists
-    if (_sessionId != null) {
-      // session expired
+    if (_sessionId != null && _sessionId.id != newSession) {
       _sessionId = _sessionId.updateSessionId(newSession);
       if (_sessionStreamActive) {
         // Send new session to listeners
