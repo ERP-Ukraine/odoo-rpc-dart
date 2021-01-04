@@ -8,7 +8,7 @@ import 'dart:async';
 
 class OdooSessionMatcher extends Matcher {
   String expected;
-  OdooSession actual;
+  late OdooSession actual;
   OdooSessionMatcher(this.expected);
 
   @override
@@ -25,9 +25,9 @@ class OdooSessionMatcher extends Matcher {
 
   @override
   bool matches(actual, Map matchState) {
-    this.actual = actual;
+    this.actual = actual as OdooSession;
     matchState['actual'] = actual is String ? actual : null;
-    return (actual as OdooSession)?.id == expected;
+    return actual.id == expected;
   }
 }
 
@@ -86,7 +86,7 @@ void main() {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(200));
       var client =
           OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
-      expect(client.sessionId.id, equals(initialSession.id));
+      expect(client.sessionId!.id, equals(initialSession.id));
     });
     test('Test refreshing session', () async {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(200));
@@ -94,13 +94,13 @@ void main() {
       var client =
           OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
 
-      expect(client.sessionId.id, equals(initialSession.id));
+      expect(client.sessionId!.id, equals(initialSession.id));
 
       final String expectedSessionId = checksum('/some/path');
       var expectForEvent = expectLater(
           client.sessionStream, emits(OdooSessionMatcher(expectedSessionId)));
       await client.callRPC('/some/path', 'funcName', {});
-      expect(client.sessionId.id, equals(expectedSessionId));
+      expect(client.sessionId!.id, equals(expectedSessionId));
       await expectForEvent;
     });
     test('Test expired session exception', () {

@@ -14,34 +14,34 @@ import 'odoo_session.dart';
 /// Odoo client for making RPC calls.
 class OdooClient {
   /// Odoo server URL in format proto://domain:port
-  String baseURL;
+  late String baseURL;
 
   /// Stores current session_id that is coming from responce cookies.
   /// Odoo server will issue new session for each call as we do cross-origin requests.
   /// Session token can be retrived with SessionId getter.
-  OdooSession _sessionId;
+  OdooSession? _sessionId;
 
   /// Tells whether we should send session change events to a stream.
   /// Activates when there are some listeners.
-  bool _sessionStreamActive;
+  bool _sessionStreamActive = false;
 
   /// Session change events stream controller
-  StreamController<OdooSession> _sessionStreamController;
+  late StreamController<OdooSession> _sessionStreamController;
 
   /// HTTP client instance. By default instantiated with [http.Client].
   /// Could be overridden for tests or custom client configuration.
-  http.BaseClient httpClient;
+  late http.BaseClient httpClient;
 
   /// Instantiates [OdooClient] with given Odoo server URL.
   /// Optionally accepts [sessionId] to reuse existing session.
   /// It is possible to pass own [httpClient] inherited
   /// from [http.BaseClient] to override default one.
   OdooClient(String baseURL,
-      [OdooSession sessionId, http.BaseClient httpClient]) {
+      [OdooSession? sessionId, http.BaseClient? httpClient]) {
     // Restore previous session
     this._sessionId = sessionId;
     // Take or init HTTP client
-    this.httpClient = httpClient != null ? httpClient : http.Client();
+    this.httpClient = httpClient ?? http.Client() as http.BaseClient;
 
     // Validate URL
     if (!isURL(baseURL)) {
@@ -52,11 +52,8 @@ class OdooClient {
     // Take only scheme://host:port
     this.baseURL = baseUri.origin;
 
-    // Disable stream until we get listeners
-    this._sessionStreamActive = false;
     this._sessionStreamController = StreamController<OdooSession>.broadcast(
-        onListen: _startSteam,
-        onCancel: _stopStream);
+        onListen: _startSteam, onCancel: _stopStream);
   }
 
   void _startSteam() => _sessionStreamActive = true;
@@ -64,32 +61,30 @@ class OdooClient {
   void _stopStream() => _sessionStreamActive = false;
 
   /// Returns current session
-  OdooSession get sessionId => this._sessionId;
+  OdooSession? get sessionId => this._sessionId;
 
   /// Returns stream of session changed events
   Stream<OdooSession> get sessionStream => _sessionStreamController.stream;
 
   /// Frees HTTP client resources
   void close() {
-    if (httpClient != null) {
-      httpClient.close();
-    }
+    httpClient.close();
   }
 
   void _setSessionId(String newSession) {
     // Update session if exists
-    if (_sessionId != null && _sessionId.id != newSession) {
-      _sessionId = _sessionId.updateSessionId(newSession);
+    if (_sessionId != null && _sessionId!.id != newSession) {
+      _sessionId = _sessionId!.updateSessionId(newSession);
       if (_sessionStreamActive) {
         // Send new session to listeners
-        _sessionStreamController.add(_sessionId);
+        _sessionStreamController.add(_sessionId!);
       }
     }
   }
 
   // Take new session from cookies and update session instance
   void _updateSessionIdFromCookies(http.Response response) {
-    String rawCookie = response.headers['set-cookie'];
+    String? rawCookie = response.headers['set-cookie'];
     if (rawCookie != null) {
       int index = rawCookie.indexOf(';');
       var sessionCookie =
@@ -107,7 +102,7 @@ class OdooClient {
     var headers = {'Content-type': 'application/json'};
 
     if (_sessionId != null) {
-      headers['Cookie'] = 'session_id=' + _sessionId.id;
+      headers['Cookie'] = 'session_id=' + _sessionId!.id;
     }
 
     var url = baseURL + path;
@@ -183,7 +178,7 @@ class OdooClient {
     _sessionId = OdooSession.fromSessionInfo(result['result']);
     // It will notify subscribers
     _updateSessionIdFromCookies(response);
-    return _sessionId;
+    return _sessionId!;
   }
 
   /// Destroys current session.

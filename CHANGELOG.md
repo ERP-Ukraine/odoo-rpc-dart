@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.3.1-0
+
+Migrate to null safety
+
 ## 0.3.0
 
 Use broadcast stream for session update events

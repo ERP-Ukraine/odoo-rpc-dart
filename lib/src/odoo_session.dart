@@ -1,7 +1,5 @@
 /// Odoo Session Object
 
-import 'package:meta/meta.dart';
-
 /// Represents session with Odoo server.
 class OdooSession {
   /// Current Session id
@@ -39,17 +37,17 @@ class OdooSession {
 
   /// [OdooSession] is immutable.
   const OdooSession({
-    @required this.id,
-    @required this.userId,
-    @required this.partnerId,
-    @required this.companyId,
-    @required this.userLogin,
-    @required this.userName,
-    @required this.userLang,
-    @required this.userTz,
-    @required this.isSystem,
-    @required this.dbName,
-    @required this.serverVersion,
+    required this.id,
+    required this.userId,
+    required this.partnerId,
+    required this.companyId,
+    required this.userLogin,
+    required this.userName,
+    required this.userLang,
+    required this.userTz,
+    required this.isSystem,
+    required this.dbName,
+    required this.serverVersion,
   });
 
   /// Creates [OdooSession] instance from odoo session info object.
@@ -57,7 +55,7 @@ class OdooSession {
     final Map<String, Object> ctx = info['user_context'] as Map<String, Object>;
     List<dynamic> versionInfo = [9];
     if (info.containsKey('server_version_info')) {
-      versionInfo = info['server_version_info'];
+      versionInfo = info['server_version_info'] as List<dynamic>;
     }
     return OdooSession(
       id: info['id'] as String,
