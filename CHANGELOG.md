@@ -1,6 +1,10 @@
 # odoo_prc changelog
 
-## 0.3.1-0
+## 0.4.0-nullsafety0
+
+Pre-release of null safety
+
+## 0.3.1
 
 Migrate to null safety
 
