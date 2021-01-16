@@ -1,12 +1,10 @@
 /// Odoo JSON-RPC Client for authentication and method calls.
-
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:core';
 
-import 'package:uuid/uuid.dart';
-import 'package:validators/validators.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 import 'odoo_exceptions.dart';
 import 'odoo_session.dart';
@@ -43,10 +41,6 @@ class OdooClient {
     // Take or init HTTP client
     this.httpClient = httpClient ?? http.Client() as http.BaseClient;
 
-    // Validate URL
-    if (!isURL(baseURL)) {
-      throw Exception('Not an URL');
-    }
     var baseUri = Uri.parse(baseURL);
 
     // Take only scheme://host:port

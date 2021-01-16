@@ -1,6 +1,6 @@
 name: odoo_rpc
 description: Odoo RPC Client library for Dart with session changes tracking via steam.
-version: 0.4.0-nullsafety0
+version: 0.4.0-nullsafety.1
 homepage: https://github.com/ERP-Ukraine/odoo-rpc-dart
 repository: https://github.com/ERP-Ukraine/odoo-rpc-dart
 
@@ -10,7 +10,6 @@ environment:
 dependencies:
   http: '>=0.12.2 <0.13.0'
   uuid: ^2.2.2
-  validators: ^2.0.1
 
 dev_dependencies:
   test: ^1.15.7

@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.4.0-nullsafety.1
+
+Drop dependency on validators package.
+
 ## 0.4.0-nullsafety0
 
 Pre-release of null safety
