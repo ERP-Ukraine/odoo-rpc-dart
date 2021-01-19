@@ -9,6 +9,8 @@ import 'package:uuid/uuid.dart';
 import 'odoo_exceptions.dart';
 import 'odoo_session.dart';
 
+enum OdooLoginEvent { loggedIn, loggedOut }
+
 /// Odoo client for making RPC calls.
 class OdooClient {
   /// Odoo server URL in format proto://domain:port
@@ -23,8 +25,14 @@ class OdooClient {
   /// Activates when there are some listeners.
   bool _sessionStreamActive = false;
 
+  /// Send LoggedIn and LoggedOut events
+  bool _loginStreamActive = false;
+
   /// Session change events stream controller
   late StreamController<OdooSession> _sessionStreamController;
+
+  /// Login events stream controller
+  late StreamController<OdooLoginEvent> _loginStreamController;
 
   /// HTTP client instance. By default instantiated with [http.Client].
   /// Could be overridden for tests or custom client configuration.
@@ -47,12 +55,19 @@ class OdooClient {
     this.baseURL = baseUri.origin;
 
     this._sessionStreamController = StreamController<OdooSession>.broadcast(
-        onListen: _startSteam, onCancel: _stopStream);
+        onListen: _startSessionSteam, onCancel: _stopSessionStream);
+
+    this._loginStreamController = StreamController<OdooLoginEvent>.broadcast(
+        onListen: _startLoginSteam, onCancel: _stopLoginStream);
   }
 
-  void _startSteam() => _sessionStreamActive = true;
+  void _startSessionSteam() => _sessionStreamActive = true;
 
-  void _stopStream() => _sessionStreamActive = false;
+  void _stopSessionStream() => _sessionStreamActive = false;
+
+  void _startLoginSteam() => _loginStreamActive = true;
+
+  void _stopLoginStream() => _loginStreamActive = false;
 
   /// Returns current session
   OdooSession? get sessionId => this._sessionId;
@@ -60,15 +75,38 @@ class OdooClient {
   /// Returns stream of session changed events
   Stream<OdooSession> get sessionStream => _sessionStreamController.stream;
 
+  /// Returns stream of login events
+  Stream<OdooLoginEvent> get loginStream => _loginStreamController.stream;
+
   /// Frees HTTP client resources
   void close() {
     httpClient.close();
   }
 
-  void _setSessionId(String newSession) {
+  void _setSessionId(String newSessionId, {bool auth = false}) {
     // Update session if exists
-    if (_sessionId != null && _sessionId!.id != newSession) {
-      _sessionId = _sessionId!.updateSessionId(newSession);
+    if (_sessionId != null && _sessionId!.id != newSessionId) {
+      final currentSessionId = _sessionId!.id;
+
+      if (currentSessionId == '' && !auth) {
+        // It is not allowed to init new session outside authenticate().
+        // Such may happen when we are already logged out
+        // but received late RPC response that contains session in cookies.
+        return;
+      }
+
+      _sessionId = _sessionId!.updateSessionId(newSessionId);
+
+      if (currentSessionId == '' && _loginStreamActive) {
+        // send logged in event
+        _loginStreamController.add(OdooLoginEvent.loggedIn);
+      }
+
+      if (newSessionId == '' && _loginStreamActive) {
+        // send logged out event
+        _loginStreamController.add(OdooLoginEvent.loggedOut);
+      }
+
       if (_sessionStreamActive) {
         // Send new session to listeners
         _sessionStreamController.add(_sessionId!);
@@ -77,7 +115,8 @@ class OdooClient {
   }
 
   // Take new session from cookies and update session instance
-  void _updateSessionIdFromCookies(http.Response response) {
+  void _updateSessionIdFromCookies(http.Response response,
+      {bool auth = false}) {
     String? rawCookie = response.headers['set-cookie'];
     if (rawCookie != null) {
       int index = rawCookie.indexOf(';');
@@ -85,7 +124,7 @@ class OdooClient {
           (index == -1) ? rawCookie : rawCookie.substring(0, index);
       if (sessionCookie.split('=').length == 2) {
         final newSessionId = sessionCookie.split('=')[1];
-        _setSessionId(newSessionId);
+        _setSessionId(newSessionId, auth: auth);
       }
     }
   }
@@ -171,7 +210,7 @@ class OdooClient {
 
     _sessionId = OdooSession.fromSessionInfo(result['result']);
     // It will notify subscribers
-    _updateSessionIdFromCookies(response);
+    _updateSessionIdFromCookies(response, auth: true);
     return _sessionId!;
   }
 

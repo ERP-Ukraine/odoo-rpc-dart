@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.4.0-nullsafety.2
+
+Add LoggedIn/LoggedOut events
+
 ## 0.4.0-nullsafety.1
 
 Drop dependency on validators package.

@@ -110,16 +110,16 @@ class OdooSession {
   OdooSession updateSessionId(String newSessionId) {
     return OdooSession(
       id: newSessionId,
-      userId: userId,
-      partnerId: partnerId,
-      companyId: companyId,
-      userLogin: userLogin,
-      userName: userName,
-      userLang: userLang,
-      userTz: userTz,
-      isSystem: isSystem,
-      dbName: dbName,
-      serverVersion: serverVersion,
+      userId: newSessionId == '' ? 0 : userId,
+      partnerId: newSessionId == '' ? 0 : partnerId,
+      companyId: newSessionId == '' ? 0 : companyId,
+      userLogin: newSessionId == '' ? '' : userLogin,
+      userName: newSessionId == '' ? '' : userName,
+      userLang: newSessionId == '' ? '' : userLang,
+      userTz: newSessionId == '' ? '' : userTz,
+      isSystem: newSessionId == '' ? false : isSystem,
+      dbName: newSessionId == '' ? '' : dbName,
+      serverVersion: newSessionId == '' ? 0 : serverVersion,
     );
   }
 

@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'dart:io';
 
 import '../lib/odoo_rpc.dart';
@@ -7,12 +8,22 @@ sessionChanged(OdooSession sessionId) async {
   // write to persistent storage
 }
 
+loginStateChanged(OdooLoginEvent event) async {
+  if (event == OdooLoginEvent.loggedIn) {
+    print('Logged in');
+  }
+  if (event == OdooLoginEvent.loggedOut) {
+    print('Logged out');
+  }
+}
+
 main() async {
   // Restore session ID from storage and pass it to client constructor.
   final baseUrl = 'https://demo.odoo.com';
   final client = OdooClient(baseUrl);
   // Subscribe to session changes to store most recent one
   var subscription = client.sessionStream.listen(sessionChanged);
+  var loginSubscription = client.loginStream.listen(loginStateChanged);
 
   try {
     // Authenticate to server with db name and credentials
@@ -79,16 +90,17 @@ main() async {
     // Check if loggeed in
     print('\nChecking session while logged in');
     res = await client.checkSession();
-    print(res);
+    print('ok');
 
     // Log out
     print('\nDestroying session');
     await client.destroySession();
-    print(res);
+    print('ok');
   } on OdooException catch (e) {
     // Cleanup on odoo exception
     print(e);
     subscription.cancel();
+    loginSubscription.cancel();
     client.close();
     exit(-1);
   }
@@ -98,9 +110,10 @@ main() async {
     var res = await client.checkSession();
     print(res);
   } on OdooSessionExpiredException {
-    print('Session expired');
+    print('Odoo Exception:Session expired');
   }
 
   subscription.cancel();
+  loginSubscription.cancel();
   client.close();
 }
