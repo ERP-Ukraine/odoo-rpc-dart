@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.4.0-nullsafety.3
+
+Init session id with empty string if not provided
+
 ## 0.4.0-nullsafety.2
 
 Add LoggedIn/LoggedOut events
