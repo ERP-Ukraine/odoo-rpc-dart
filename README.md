@@ -18,7 +18,7 @@ To use this plugin, add odoo_rpc as a dependency in your pubspec.yaml file. For 
 
 ```yaml
 dependencies:
-  odoo_rpc: ^0.2.9
+  odoo_rpc: ^0.3.0
 ```
 
 ## Examples

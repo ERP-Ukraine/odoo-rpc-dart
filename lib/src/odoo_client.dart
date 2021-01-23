@@ -3,8 +3,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
-import 'package:uuid/uuid.dart';
 
 import 'odoo_exceptions.dart';
 import 'odoo_session.dart';
@@ -138,15 +138,15 @@ class OdooClient {
       headers['Cookie'] = 'session_id=' + _sessionId!.id;
     }
 
-    var url = baseURL + path;
+    final uri = Uri.parse(baseURL + path);
     var body = json.encode({
       'jsonrpc': '2.0',
       'method': 'funcName',
       'params': params,
-      'id': Uuid().v1()
+      'id': sha1.convert(utf8.encode(DateTime.now().toString())).toString()
     });
 
-    final response = await httpClient.post(url, body: body, headers: headers);
+    final response = await httpClient.post(uri, body: body, headers: headers);
     _updateSessionIdFromCookies(response);
     var result = json.decode(response.body);
     if (result['error'] != null) {
@@ -179,15 +179,15 @@ class OdooClient {
       String db, String login, String password) async {
     final params = {'db': db, 'login': login, 'password': password};
     const headers = {'Content-type': 'application/json'};
-    final url = baseURL + '/web/session/authenticate';
+    final uri = Uri.parse(baseURL + '/web/session/authenticate');
     final body = json.encode({
       'jsonrpc': '2.0',
       'method': 'call',
       'params': params,
-      'id': Uuid().v1()
+      'id': sha1.convert(utf8.encode(DateTime.now().toString())).toString()
     });
 
-    final response = await httpClient.post(url, body: body, headers: headers);
+    final response = await httpClient.post(uri, body: body, headers: headers);
     var result = json.decode(response.body);
     if (result['error'] != null) {
       if (result['error']['code'] == 100) {

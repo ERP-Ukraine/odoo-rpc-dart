@@ -1,5 +1,10 @@
 # odoo_prc changelog
 
+## 0.4.0-nullsafety.4
+
+Removed dependency on uuid package.
+It allowed to change all dependencies to nullsafety version.
+
 ## 0.4.0-nullsafety.3
 
 Init session id with empty string if not provided

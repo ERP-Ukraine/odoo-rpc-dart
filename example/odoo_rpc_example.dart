@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'dart:io';
 
 import '../lib/odoo_rpc.dart';
