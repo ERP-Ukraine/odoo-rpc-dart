@@ -16,6 +16,11 @@ loginStateChanged(OdooLoginEvent event) async {
   }
 }
 
+inRequestChanged(bool event) async {
+  if (event) print('Request is executing'); // draw progress indicator
+  if (!event) print('Request is finished'); // hide progress indicator
+}
+
 main() async {
   // Restore session ID from storage and pass it to client constructor.
   final baseUrl = 'https://demo.odoo.com';
@@ -23,6 +28,7 @@ main() async {
   // Subscribe to session changes to store most recent one
   var subscription = client.sessionStream.listen(sessionChanged);
   var loginSubscription = client.loginStream.listen(loginStateChanged);
+  var inRequestSubscription = client.inRequestStream.listen(inRequestChanged);
 
   try {
     // Authenticate to server with db name and credentials
@@ -48,7 +54,7 @@ main() async {
         'fields': ['id', 'name', '__last_update', image_field],
       },
     });
-    print('\nUser info: \n' + res.toString()) as List<dynamic>;
+    print('\nUser info: \n' + res.toString());
     // compute avatar url if we got reply
     if (res.length == 1) {
       var unique = res[0]['__last_update'] as String;
@@ -100,6 +106,7 @@ main() async {
     print(e);
     subscription.cancel();
     loginSubscription.cancel();
+    inRequestSubscription.cancel();
     client.close();
     exit(-1);
   }
@@ -111,8 +118,9 @@ main() async {
   } on OdooSessionExpiredException {
     print('Odoo Exception:Session expired');
   }
-
+  await client.inRequestStream.isEmpty;
   subscription.cancel();
   loginSubscription.cancel();
+  inRequestSubscription.cancel();
   client.close();
 }

@@ -32,11 +32,17 @@ class OdooClient {
   /// Send LoggedIn and LoggedOut events
   bool _loginStreamActive = false;
 
+  /// Send in request events
+  bool _inRequestStreamActive = false;
+
   /// Session change events stream controller
   late StreamController<OdooSession> _sessionStreamController;
 
   /// Login events stream controller
   late StreamController<OdooLoginEvent> _loginStreamController;
+
+  /// Sends true while request is executed and false when it's done
+  late StreamController<bool> _inRequestStreamController;
 
   /// HTTP client instance. By default instantiated with [http.Client].
   /// Could be overridden for tests or custom client configuration.
@@ -63,6 +69,9 @@ class OdooClient {
 
     this._loginStreamController = StreamController<OdooLoginEvent>.broadcast(
         onListen: _startLoginSteam, onCancel: _stopLoginStream);
+
+    this._inRequestStreamController = StreamController<bool>.broadcast(
+        onListen: _startInRequestSteam, onCancel: _stopInRequestStream);
   }
 
   void set frontendLang(String value) => _frontendLang = value;
@@ -77,6 +86,10 @@ class OdooClient {
 
   void _stopLoginStream() => _loginStreamActive = false;
 
+  void _startInRequestSteam() => _inRequestStreamActive = true;
+
+  void _stopInRequestStream() => _inRequestStreamActive = false;
+
   /// Returns current session
   OdooSession? get sessionId => this._sessionId;
 
@@ -85,6 +98,10 @@ class OdooClient {
 
   /// Returns stream of login events
   Stream<OdooLoginEvent> get loginStream => _loginStreamController.stream;
+
+  /// Returns stream of inRequest events
+  Stream<bool> get inRequestStream => _inRequestStreamController.stream;
+  Future get inRequestStreamDone => _inRequestStreamController.done;
 
   /// Frees HTTP client resources
   void close() {
@@ -164,22 +181,31 @@ class OdooClient {
       'id': sha1.convert(utf8.encode(DateTime.now().toString())).toString()
     });
 
-    final response = await httpClient.post(uri, body: body, headers: headers);
-    _updateSessionIdFromCookies(response);
-    var result = json.decode(response.body);
-    if (result['error'] != null) {
-      if (result['error']['code'] == 100) {
-        // session expired
-        _setSessionId('');
-        final err = result['error'].toString();
-        throw OdooSessionExpiredException(err);
-      } else {
-        // Other error
-        final err = result['error'].toString();
-        throw OdooException(err);
+    try {
+      if (_inRequestStreamActive) _inRequestStreamController.add(true);
+      final response = await httpClient.post(uri, body: body, headers: headers);
+
+      _updateSessionIdFromCookies(response);
+      var result = json.decode(response.body);
+      if (result['error'] != null) {
+        if (result['error']['code'] == 100) {
+          // session expired
+          _setSessionId('');
+          final err = result['error'].toString();
+          throw OdooSessionExpiredException(err);
+        } else {
+          // Other error
+          final err = result['error'].toString();
+          throw OdooException(err);
+        }
       }
+
+      if (_inRequestStreamActive) _inRequestStreamController.add(false);
+      return result['result'];
+    } catch (e) {
+      if (_inRequestStreamActive) _inRequestStreamController.add(false);
+      rethrow;
     }
-    return result['result'];
   }
 
   /// Calls any public method on a model.
@@ -204,32 +230,40 @@ class OdooClient {
       'params': params,
       'id': sha1.convert(utf8.encode(DateTime.now().toString())).toString()
     });
+    try {
+      if (_inRequestStreamActive) _inRequestStreamController.add(true);
+      final response = await httpClient.post(uri, body: body, headers: headers);
 
-    final response = await httpClient.post(uri, body: body, headers: headers);
-    var result = json.decode(response.body);
-    if (result['error'] != null) {
-      if (result['error']['code'] == 100) {
-        // session expired
-        _setSessionId('');
-        final err = result['error'].toString();
-        throw OdooSessionExpiredException(err);
-      } else {
-        // Other error
-        final err = result['error'].toString();
-        throw OdooException(err);
+      var result = json.decode(response.body);
+      if (result['error'] != null) {
+        if (result['error']['code'] == 100) {
+          // session expired
+          _setSessionId('');
+          final err = result['error'].toString();
+          throw OdooSessionExpiredException(err);
+        } else {
+          // Other error
+          final err = result['error'].toString();
+          throw OdooException(err);
+        }
       }
-    }
-    // Odoo 11 sets uid to False on failed login without any error message
-    if (result['result'].containsKey('uid')) {
-      if (result['result']['uid'] is bool) {
-        throw OdooException('Authentication failed');
+      // Odoo 11 sets uid to False on failed login without any error message
+      if (result['result'].containsKey('uid')) {
+        if (result['result']['uid'] is bool) {
+          throw OdooException('Authentication failed');
+        }
       }
-    }
 
-    _sessionId = OdooSession.fromSessionInfo(result['result']);
-    // It will notify subscribers
-    _updateSessionIdFromCookies(response, auth: true);
-    return _sessionId!;
+      _sessionId = OdooSession.fromSessionInfo(result['result']);
+      // It will notify subscribers
+      _updateSessionIdFromCookies(response, auth: true);
+
+      if (_inRequestStreamActive) _inRequestStreamController.add(false);
+      return _sessionId!;
+    } catch (e) {
+      if (_inRequestStreamActive) _inRequestStreamController.add(false);
+      rethrow;
+    }
   }
 
   /// Destroys current session.

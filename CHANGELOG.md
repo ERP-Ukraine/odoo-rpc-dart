@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.4.0-nullsafety.6
+
+Add in reqest stream. It will allow to show progress bar while request is executed.
+
 ## 0.4.0-nullsafety.5
 
 Add optional frontendLang to mimic user's website language.
