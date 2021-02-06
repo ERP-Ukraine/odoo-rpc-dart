@@ -1,5 +1,11 @@
 # odoo_prc changelog
 
+## 0.4.0-nullsafety.5
+
+Add optional frontendLang to mimic user's website language.
+Now it is possible to track phone's locale changes and
+issue requests with updated language as if it it was set on website.
+
 ## 0.4.0-nullsafety.4
 
 Removed dependency on uuid package.

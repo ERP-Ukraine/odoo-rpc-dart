@@ -21,6 +21,10 @@ class OdooClient {
   /// Session token can be retrived with SessionId getter.
   OdooSession? _sessionId;
 
+  /// Language used by user on website.
+  /// It may be different from [OdooSession.userLang]
+  String _frontendLang = '';
+
   /// Tells whether we should send session change events to a stream.
   /// Activates when there are some listeners.
   bool _sessionStreamActive = false;
@@ -60,6 +64,10 @@ class OdooClient {
     this._loginStreamController = StreamController<OdooLoginEvent>.broadcast(
         onListen: _startLoginSteam, onCancel: _stopLoginStream);
   }
+
+  void set frontendLang(String value) => _frontendLang = value;
+
+  String get frontendLang => _frontendLang;
 
   void _startSessionSteam() => _sessionStreamActive = true;
 
@@ -133,9 +141,19 @@ class OdooClient {
   /// It has to be used on all Odoo Controllers with type='json'
   Future<dynamic> callRPC(path, funcName, params) async {
     var headers = {'Content-type': 'application/json'};
-
+    var cookie = '';
     if (_sessionId != null) {
-      headers['Cookie'] = 'session_id=' + _sessionId!.id;
+      cookie = 'session_id=' + _sessionId!.id;
+    }
+    if (_frontendLang.isNotEmpty) {
+      if (cookie.isEmpty) {
+        cookie = 'frontend_lang=$_frontendLang';
+      } else {
+        cookie += '; frontend_lang=$_frontendLang';
+      }
+    }
+    if (cookie.isNotEmpty) {
+      headers['Cookie'] = cookie;
     }
 
     final uri = Uri.parse(baseURL + path);
