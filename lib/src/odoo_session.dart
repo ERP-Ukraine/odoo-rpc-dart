@@ -51,8 +51,8 @@ class OdooSession {
   });
 
   /// Creates [OdooSession] instance from odoo session info object.
-  static OdooSession fromSessionInfo(Map<String, Object> info) {
-    final Map<String, Object> ctx = info['user_context'] as Map<String, Object>;
+  static OdooSession fromSessionInfo(Map<String, dynamic> info) {
+    final Map<String, dynamic> ctx = info['user_context'] as Map<String, dynamic>;
     List<dynamic> versionInfo = [9];
     if (info.containsKey('server_version_info')) {
       versionInfo = info['server_version_info'] as List<dynamic>;
@@ -73,7 +73,7 @@ class OdooSession {
   }
 
   /// Stores [OdooSession] to JSON
-  Map<String, Object> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'userId': userId,
@@ -90,7 +90,7 @@ class OdooSession {
   }
 
   /// Restore [OdooSession] from JSON
-  static OdooSession fromJson(Map<String, Object> json) {
+  static OdooSession fromJson(Map<String, dynamic> json) {
     return OdooSession(
       id: json['id'] as String,
       userId: json['userId'] as int,
