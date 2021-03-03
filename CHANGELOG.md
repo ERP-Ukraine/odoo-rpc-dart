@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.4.1
+
+Pedantic refactor
+
 ## 0.4.0
 
 Release null-safety version

@@ -13,7 +13,7 @@ class OdooSessionMatcher extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add("has expected session = '${expected}'");
+    return description.add("has expected session = '$expected'");
   }
 
   @override
@@ -32,7 +32,7 @@ class OdooSessionMatcher extends Matcher {
 }
 
 String checksum(String payload) {
-  List<int> bytes = utf8.encode(payload);
+  var bytes = utf8.encode(payload);
   return sha256.convert(bytes).toString();
 }
 
@@ -50,7 +50,7 @@ http_testing.MockClientHandler getFakeRequestHandler(final int code) {
       body = '{"error": {"code": 400, "message": "Internal Server Error"}}';
     }
     final response = http.Response(body, code, headers: headers);
-    return new Future<http.Response>.sync(() => response);
+    return Future<http.Response>.sync(() => response);
   }
 
   return fakeRequestHandler;
@@ -96,7 +96,7 @@ void main() {
 
       expect(client.sessionId!.id, equals(initialSession.id));
 
-      final String expectedSessionId = checksum('/some/path');
+      final expectedSessionId = checksum('/some/path');
       var expectForEvent = expectLater(
           client.sessionStream, emits(OdooSessionMatcher(expectedSessionId)));
       await client.callRPC('/some/path', 'funcName', {});

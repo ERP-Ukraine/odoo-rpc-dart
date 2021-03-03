@@ -13,6 +13,7 @@ class OdooException implements Exception {
 /// Exception for session expired error.
 class OdooSessionExpiredException extends OdooException {
   /// Exception message coming from Odoo server.
+  @override
   String message;
   OdooSessionExpiredException(this.message) : super(message);
 

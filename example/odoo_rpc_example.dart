@@ -2,12 +2,12 @@ import 'dart:io';
 
 import '../lib/odoo_rpc.dart';
 
-sessionChanged(OdooSession sessionId) async {
+void sessionChanged(OdooSession sessionId) async {
   print('We got new session ID: ' + sessionId.id);
   // write to persistent storage
 }
 
-loginStateChanged(OdooLoginEvent event) async {
+void loginStateChanged(OdooLoginEvent event) async {
   if (event == OdooLoginEvent.loggedIn) {
     print('Logged in');
   }
@@ -16,12 +16,12 @@ loginStateChanged(OdooLoginEvent event) async {
   }
 }
 
-inRequestChanged(bool event) async {
+void inRequestChanged(bool event) async {
   if (event) print('Request is executing'); // draw progress indicator
   if (!event) print('Request is finished'); // hide progress indicator
 }
 
-main() async {
+void main() async {
   // Restore session ID from storage and pass it to client constructor.
   final baseUrl = 'https://demo.odoo.com';
   final client = OdooClient(baseUrl);
@@ -58,7 +58,7 @@ main() async {
     // compute avatar url if we got reply
     if (res.length == 1) {
       var unique = res[0]['__last_update'] as String;
-      unique = unique.replaceAll(new RegExp(r'[^0-9]'), '');
+      unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
       final user_avatar =
           '$baseUrl/web/image?model=res.user&field=$image_field&id=$uid&unique=$unique';
       print('User Avatar URL: $user_avatar');
@@ -104,9 +104,9 @@ main() async {
   } on OdooException catch (e) {
     // Cleanup on odoo exception
     print(e);
-    subscription.cancel();
-    loginSubscription.cancel();
-    inRequestSubscription.cancel();
+    await subscription.cancel();
+    await loginSubscription.cancel();
+    await inRequestSubscription.cancel();
     client.close();
     exit(-1);
   }
@@ -119,8 +119,8 @@ main() async {
     print('Odoo Exception:Session expired');
   }
   await client.inRequestStream.isEmpty;
-  subscription.cancel();
-  loginSubscription.cancel();
-  inRequestSubscription.cancel();
+  await subscription.cancel();
+  await loginSubscription.cancel();
+  await inRequestSubscription.cancel();
   client.close();
 }

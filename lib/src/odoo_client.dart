@@ -23,7 +23,7 @@ class OdooClient {
 
   /// Language used by user on website.
   /// It may be different from [OdooSession.userLang]
-  String _frontendLang = '';
+  String frontendLang = '';
 
   /// Tells whether we should send session change events to a stream.
   /// Activates when there are some listeners.
@@ -55,7 +55,7 @@ class OdooClient {
   OdooClient(String baseURL,
       [OdooSession? sessionId, http.BaseClient? httpClient]) {
     // Restore previous session
-    this._sessionId = sessionId;
+    _sessionId = sessionId;
     // Take or init HTTP client
     this.httpClient = httpClient ?? http.Client() as http.BaseClient;
 
@@ -64,19 +64,15 @@ class OdooClient {
     // Take only scheme://host:port
     this.baseURL = baseUri.origin;
 
-    this._sessionStreamController = StreamController<OdooSession>.broadcast(
+    _sessionStreamController = StreamController<OdooSession>.broadcast(
         onListen: _startSessionSteam, onCancel: _stopSessionStream);
 
-    this._loginStreamController = StreamController<OdooLoginEvent>.broadcast(
+    _loginStreamController = StreamController<OdooLoginEvent>.broadcast(
         onListen: _startLoginSteam, onCancel: _stopLoginStream);
 
-    this._inRequestStreamController = StreamController<bool>.broadcast(
+    _inRequestStreamController = StreamController<bool>.broadcast(
         onListen: _startInRequestSteam, onCancel: _stopInRequestStream);
   }
-
-  void set frontendLang(String value) => _frontendLang = value;
-
-  String get frontendLang => _frontendLang;
 
   void _startSessionSteam() => _sessionStreamActive = true;
 
@@ -91,7 +87,7 @@ class OdooClient {
   void _stopInRequestStream() => _inRequestStreamActive = false;
 
   /// Returns current session
-  OdooSession? get sessionId => this._sessionId;
+  OdooSession? get sessionId => _sessionId;
 
   /// Returns stream of session changed events
   Stream<OdooSession> get sessionStream => _sessionStreamController.stream;
@@ -142,9 +138,9 @@ class OdooClient {
   // Take new session from cookies and update session instance
   void _updateSessionIdFromCookies(http.Response response,
       {bool auth = false}) {
-    String? rawCookie = response.headers['set-cookie'];
+    final rawCookie = response.headers['set-cookie'];
     if (rawCookie != null) {
-      int index = rawCookie.indexOf(';');
+      final index = rawCookie.indexOf(';');
       var sessionCookie =
           (index == -1) ? rawCookie : rawCookie.substring(0, index);
       if (sessionCookie.split('=').length == 2) {
@@ -162,11 +158,11 @@ class OdooClient {
     if (_sessionId != null) {
       cookie = 'session_id=' + _sessionId!.id;
     }
-    if (_frontendLang.isNotEmpty) {
+    if (frontendLang.isNotEmpty) {
       if (cookie.isEmpty) {
-        cookie = 'frontend_lang=$_frontendLang';
+        cookie = 'frontend_lang=$frontendLang';
       } else {
-        cookie += '; frontend_lang=$_frontendLang';
+        cookie += '; frontend_lang=$frontendLang';
       }
     }
     if (cookie.isNotEmpty) {
