@@ -53,9 +53,10 @@ class OdooSession {
   /// Creates [OdooSession] instance from odoo session info object.
   static OdooSession fromSessionInfo(Map<String, dynamic> info) {
     final ctx = info['user_context'] as Map<String, dynamic>;
-    var versionInfo = [9];
+    List<dynamic> versionInfo;
+    versionInfo = [9];
     if (info.containsKey('server_version_info')) {
-      versionInfo = info['server_version_info'] as List<int>;
+      versionInfo = info['server_version_info'];
     }
     return OdooSession(
       id: info['id'] as String? ?? '',
@@ -68,7 +69,7 @@ class OdooSession {
       userTz: ctx['tz'] is String ? ctx['tz'] as String : 'UTC',
       isSystem: info['is_system'] as bool,
       dbName: info['db'] as String,
-      serverVersion: versionInfo[0],
+      serverVersion: versionInfo[0] as int,
     );
   }
 
