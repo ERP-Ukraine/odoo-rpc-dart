@@ -38,9 +38,15 @@ String checksum(String payload) {
 
 http_testing.MockClientHandler getFakeRequestHandler(final int code) {
   Future<http.Response> fakeRequestHandler(http.Request request) {
+    // multiple cookies joined with comma
     final headers = {
       'Content-type': 'application/json',
-      'set-cookie': 'session_id=' + checksum(request.url.path)
+      'set-cookie': '__cfduid=d7aa416b09272df9c8ooooooo84f5d031615155878'
+          '; expires=Tue, 06-Apr-21 22:24:38 GMT'
+          '; path=/; domain=.mhfly.com; HttpOnly'
+          '; SameSite=Lax,session_id=${checksum(request.url.path)}'
+          '; Expires=Sat, 05-Jun-2021 22:24:38 GMT; Max-Age=7776000'
+          '; HttpOnly; Path=/'
     };
     var body = '{"jsonrpc": "2.0", "id": 91215686, "result": []}';
     if (code == 100) {

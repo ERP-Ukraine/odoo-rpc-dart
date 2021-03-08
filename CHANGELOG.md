@@ -1,5 +1,9 @@
 # odoo_prc changelog
 
+## 0.4.3
+
+Handle multiple cookies joined with comma
+
 ## 0.4.2
 
 Fixed type castins for session info
