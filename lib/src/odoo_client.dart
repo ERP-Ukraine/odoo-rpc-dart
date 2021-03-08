@@ -6,6 +6,7 @@ import 'dart:core';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
+import 'cookie.dart';
 import 'odoo_exceptions.dart';
 import 'odoo_session.dart';
 
@@ -138,14 +139,21 @@ class OdooClient {
   // Take new session from cookies and update session instance
   void _updateSessionIdFromCookies(http.Response response,
       {bool auth = false}) {
-    final rawCookie = response.headers['set-cookie'];
-    if (rawCookie != null) {
-      final index = rawCookie.indexOf(';');
-      var sessionCookie =
-          (index == -1) ? rawCookie : rawCookie.substring(0, index);
-      if (sessionCookie.split('=').length == 2) {
-        final newSessionId = sessionCookie.split('=')[1];
-        _setSessionId(newSessionId, auth: auth);
+    // see https://github.com/dart-lang/http/issues/362
+    final look_for_comma_expression = RegExp(r'(?<=)(,)(?=[^;]+?=)');
+    var cookiesStr = response.headers['set-cookie'];
+    if (cookiesStr == null) {
+      return;
+    }
+
+    for (final cookieStr in cookiesStr.split(look_for_comma_expression)) {
+      try {
+        final cookie = Cookie.fromSetCookieValue(cookieStr);
+        if (cookie.name == 'session_id') {
+          _setSessionId(cookie.value, auth: auth);
+        }
+      } catch (e) {
+        throw OdooException(e.toString());
       }
     }
   }
