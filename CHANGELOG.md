@@ -1,4 +1,8 @@
-# odoo_prc changelog
+# odoo_rpc changelog
+
+## 0.4.5
+
+Removed dependency on pre-release sdk
 
 ## 0.4.4
 
