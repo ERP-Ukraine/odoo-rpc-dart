@@ -170,7 +170,7 @@ class HomePage extends StatelessWidget {
 }
 ```
 
-For more complex usage consider [odoo_repository][https://pub.dev/packages/odoo_repository] as abstraction layer between your flutter app and Odoo backend.
+For more complex usage consider [odoo_repository](https://pub.dev/packages/odoo_repository) as abstraction layer between your flutter app and Odoo backend.
 
 ## Web platform notice
 
