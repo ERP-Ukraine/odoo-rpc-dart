@@ -170,6 +170,15 @@ class HomePage extends StatelessWidget {
 }
 ```
 
+For more complex usage consider [odoo_repository][https://pub.dev/packages/odoo_repository] as abstraction layer between your flutter app and Odoo backend.
+
+## Web platform notice
+
+This package intentionally uses `http` package instead of `dart:io` so web platform could be supported.
+However RPC calls via web client (dart js) that is hosted on separate domain will not work
+due to CORS requests currently are not correctly handled by Odoo.
+See [https://github.com/odoo/odoo/pull/37853](https://github.com/odoo/odoo/pull/37853) for the details.
+
 ## Issues
 
 Please file any issues, bugs or feature requests as an issue on our [GitHub](https://github.com/ERP-Ukraine/odoo-rpc-dart/issues) page.
@@ -180,4 +189,4 @@ If you would like to contribute to the plugin (e.g. by improving the documentati
 
 ## Author
 
-This Geolocator plugin for Flutter is developed by [ERP Ukraine](https://erp.co.ua).
+Odoo RPC Client Library is developed by [ERP Ukraine](https://erp.co.ua).
