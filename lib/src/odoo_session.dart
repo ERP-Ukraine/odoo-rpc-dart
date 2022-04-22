@@ -33,7 +33,7 @@ class OdooSession {
   final String dbName;
 
   /// Server Major version
-  final int serverVersion;
+  final String serverVersion;
 
   /// [OdooSession] is immutable.
   const OdooSession({
@@ -69,7 +69,7 @@ class OdooSession {
       userTz: ctx['tz'] is String ? ctx['tz'] as String : 'UTC',
       isSystem: info['is_system'] as bool,
       dbName: info['db'] as String,
-      serverVersion: versionInfo[0] as int,
+      serverVersion: versionInfo[0].toString(),
     );
   }
 
@@ -103,7 +103,7 @@ class OdooSession {
       userTz: json['userTz'] as String,
       isSystem: json['isSystem'] as bool,
       dbName: json['dbName'] as String,
-      serverVersion: json['serverVersion'] as int,
+      serverVersion: json['serverVersion'].toString(),
     );
   }
 
@@ -120,7 +120,7 @@ class OdooSession {
       userTz: newSessionId == '' ? '' : userTz,
       isSystem: newSessionId == '' ? false : isSystem,
       dbName: newSessionId == '' ? '' : dbName,
-      serverVersion: newSessionId == '' ? 0 : serverVersion,
+      serverVersion: newSessionId == '' ? '' : serverVersion,
     );
   }
 

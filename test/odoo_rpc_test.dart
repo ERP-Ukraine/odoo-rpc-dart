@@ -73,7 +73,7 @@ const OdooSession initialSession = OdooSession(
   userTz: 'Europe/Brussels',
   isSystem: true,
   dbName: 'odoo',
-  serverVersion: 13,
+  serverVersion: '13',
 );
 
 void main() {
