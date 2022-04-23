@@ -37,15 +37,7 @@ void main() async {
     print('Authenticated');
 
     // Compute image avatar field name depending on server version
-    final image_field = [
-      '8',
-      '9',
-      '10',
-      '11',
-      '12',
-    ].contains(session.serverVersion)
-        ? 'image_small'
-        : 'image_128';
+    final image_field = session.serverVersionInt >= 13 ? 'image_128' : 'image_small';
 
     // Read our user's fields
     final uid = session.userId;

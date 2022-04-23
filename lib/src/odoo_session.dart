@@ -124,6 +124,19 @@ class OdooSession {
     );
   }
 
+  /// [serverVersionInt] returns Odoo server major version as int.
+  /// It is useful for for cases like
+  /// ```dart
+  /// final image_field = session.serverVersionInt >= 13 ? 'image_128' : 'image_small';
+  /// ```
+  int get serverVersionInt {
+    // Take last two chars for name like 'saas~14'
+    final serverVersionSanitized = serverVersion.length == 1
+        ? serverVersion
+        : serverVersion.substring(serverVersion.length - 2);
+    return int.tryParse(serverVersionSanitized) ?? -1;
+  }
+
   /// String representation of [OdooSession] object.
   @override
   String toString() {

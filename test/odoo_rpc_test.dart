@@ -77,6 +77,39 @@ const OdooSession initialSession = OdooSession(
 );
 
 void main() {
+  group('Helpers', () {
+    test('Test ServerVersionInt', () {
+      expect(initialSession.serverVersionInt, equals(13));
+      const saasSession = OdooSession(
+        id: 'random-session-hash',
+        userId: 2,
+        partnerId: 3,
+        companyId: 1,
+        userLogin: 'admin',
+        userName: 'Mitchel Admin',
+        userLang: 'en_US',
+        userTz: 'Europe/Brussels',
+        isSystem: true,
+        dbName: 'odoo',
+        serverVersion: 'saas~15',
+      );
+      expect(saasSession.serverVersionInt, equals(15));
+      const openerpSession = OdooSession(
+        id: 'random-session-hash',
+        userId: 2,
+        partnerId: 3,
+        companyId: 1,
+        userLogin: 'admin',
+        userName: 'Mitchel Admin',
+        userLang: 'en_US',
+        userTz: 'Europe/Brussels',
+        isSystem: true,
+        dbName: 'odoo',
+        serverVersion: '8',
+      );
+      expect(openerpSession.serverVersionInt, equals(8));
+    });
+  });
   group('Constructor', () {
     test('Test base URL without trailing slash', () {
       var client = OdooClient('https://demo.erp.co.ua');
