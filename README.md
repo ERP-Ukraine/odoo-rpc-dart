@@ -89,7 +89,7 @@ main() async {
 }
 ```
 
-Flutter example using `FutureBuilder`
+Flutter [example](https://github.com/ERP-Ukraine/odoo-rpc-flutter-demo) using `FutureBuilder`.
 
 ```dart
 import 'package:flutter/material.dart';
