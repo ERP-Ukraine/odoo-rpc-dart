@@ -1,5 +1,9 @@
 # odoo_rpc changelog
 
+## 0.5.2
+
+Updated http dependency version
+
 ## 0.5.1
 
 Add serverVersionInt helper

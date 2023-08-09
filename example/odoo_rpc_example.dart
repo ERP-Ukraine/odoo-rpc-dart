@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import '../lib/odoo_rpc.dart';
+import 'package:odoo_rpc/odoo_rpc.dart';
 
 void sessionChanged(OdooSession sessionId) async {
-  print('We got new session ID: ' + sessionId.id);
+  print('We got new session ID: ${sessionId.id}');
   // write to persistent storage
 }
 
