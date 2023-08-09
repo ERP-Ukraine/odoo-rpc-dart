@@ -140,13 +140,13 @@ class OdooClient {
   void _updateSessionIdFromCookies(http.Response response,
       {bool auth = false}) {
     // see https://github.com/dart-lang/http/issues/362
-    final look_for_comma_expression = RegExp(r'(?<=)(,)(?=[^;]+?=)');
+    final lookForCommaExpression = RegExp(r'(?<=)(,)(?=[^;]+?=)');
     var cookiesStr = response.headers['set-cookie'];
     if (cookiesStr == null) {
       return;
     }
 
-    for (final cookieStr in cookiesStr.split(look_for_comma_expression)) {
+    for (final cookieStr in cookiesStr.split(lookForCommaExpression)) {
       try {
         final cookie = Cookie.fromSetCookieValue(cookieStr);
         if (cookie.name == 'session_id') {
@@ -164,7 +164,7 @@ class OdooClient {
     var headers = {'Content-type': 'application/json'};
     var cookie = '';
     if (_sessionId != null) {
-      cookie = 'session_id=' + _sessionId!.id;
+      cookie = 'session_id=${_sessionId!.id}';
     }
     if (frontendLang.isNotEmpty) {
       if (cookie.isEmpty) {
@@ -227,7 +227,7 @@ class OdooClient {
       String db, String login, String password) async {
     final params = {'db': db, 'login': login, 'password': password};
     const headers = {'Content-type': 'application/json'};
-    final uri = Uri.parse(baseURL + '/web/session/authenticate');
+    final uri = Uri.parse('$baseURL/web/session/authenticate');
     final body = json.encode({
       'jsonrpc': '2.0',
       'method': 'call',

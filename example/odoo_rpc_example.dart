@@ -37,7 +37,7 @@ void main() async {
     print('Authenticated');
 
     // Compute image avatar field name depending on server version
-    final image_field =
+    final imageField =
         session.serverVersionInt >= 13 ? 'image_128' : 'image_small';
 
     // Read our user's fields
@@ -51,21 +51,21 @@ void main() async {
         'domain': [
           ['id', '=', uid]
         ],
-        'fields': ['id', 'name', '__last_update', image_field],
+        'fields': ['id', 'name', '__last_update', imageField],
       },
     });
-    print('\nUser info: \n' + res.toString());
+    print('\nUser info: \n$res');
     // compute avatar url if we got reply
     if (res.length == 1) {
       var unique = res[0]['__last_update'] as String;
       unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
-      final user_avatar =
-          '$baseUrl/web/image?model=res.user&field=$image_field&id=$uid&unique=$unique';
-      print('User Avatar URL: $user_avatar');
+      final userAvatar =
+          '$baseUrl/web/image?model=res.user&field=$imageField&id=$uid&unique=$unique';
+      print('User Avatar URL: $userAvatar');
     }
 
     // Create partner
-    var partner_id = await client.callKw({
+    var partnerId = await client.callKw({
       'model': 'res.partner',
       'method': 'create',
       'args': [
@@ -80,7 +80,7 @@ void main() async {
       'model': 'res.partner',
       'method': 'write',
       'args': [
-        partner_id,
+        partnerId,
         {
           'is_company': true,
         },
@@ -90,7 +90,7 @@ void main() async {
 
     // Get list of installed modules
     res = await client.callRPC('/web/session/modules', 'call', {});
-    print('\nInstalled modules: \n' + res.toString());
+    print('\nInstalled modules: \n$res');
 
     // Check if loggeed in
     print('\nChecking session while logged in');
