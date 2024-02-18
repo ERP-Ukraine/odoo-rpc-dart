@@ -12,9 +12,6 @@ class OdooSession {
   /// User's partner database id
   final int partnerId;
 
-  /// User's company database id
-  final int companyId;
-
   /// User's login
   final String userLogin;
 
@@ -41,7 +38,6 @@ class OdooSession {
     required this.id,
     required this.userId,
     required this.partnerId,
-    required this.companyId,
     required this.userLogin,
     required this.userName,
     required this.userLang,
@@ -63,7 +59,6 @@ class OdooSession {
       id: info['id'] as String? ?? '',
       userId: info['uid'] as int,
       partnerId: info['partner_id'] as int,
-      companyId: info['company_id'] as int,
       userLogin: info['username'] as String,
       userName: info['name'] as String,
       userLang: ctx['lang'] as String,
@@ -80,7 +75,6 @@ class OdooSession {
       'id': id,
       'userId': userId,
       'partnerId': partnerId,
-      'companyId': companyId,
       'userLogin': userLogin,
       'userName': userName,
       'userLang': userLang,
@@ -97,7 +91,6 @@ class OdooSession {
       id: json['id'] as String,
       userId: json['userId'] as int,
       partnerId: json['partnerId'] as int,
-      companyId: json['companyId'] as int,
       userLogin: json['userLogin'] as String,
       userName: json['userName'] as String,
       userLang: json['userLang'] as String,
@@ -114,7 +107,6 @@ class OdooSession {
       id: newSessionId,
       userId: newSessionId == '' ? 0 : userId,
       partnerId: newSessionId == '' ? 0 : partnerId,
-      companyId: newSessionId == '' ? 0 : companyId,
       userLogin: newSessionId == '' ? '' : userLogin,
       userName: newSessionId == '' ? '' : userName,
       userLang: newSessionId == '' ? '' : userLang,
@@ -141,6 +133,6 @@ class OdooSession {
   /// String representation of [OdooSession] object.
   @override
   String toString() {
-    return 'OdooSession {userName: $userName, userLogin: $userLogin, userId: $userId, companyId: $companyId, id: $id}';
+    return 'OdooSession {userName: $userName, userLogin: $userLogin, userId: $userId, id: $id}';
   }
 }

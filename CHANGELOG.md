@@ -1,5 +1,9 @@
 # odoo_rpc changelog
 
+## 0.5.4
+
+Removed companyId from OdooSession since it is not longer returned
+
 ## 0.5.3
 
 Fixed funcName call in callRPC
