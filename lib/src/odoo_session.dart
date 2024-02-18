@@ -1,4 +1,5 @@
 /// Odoo Session Object
+library;
 
 /// Represents session with Odoo server.
 class OdooSession {

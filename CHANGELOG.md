@@ -1,5 +1,9 @@
 # odoo_rpc changelog
 
+## 0.5.3
+
+Fixed funcName call in callRPC
+
 ## 0.5.2
 
 Updated http dependency version

@@ -1,4 +1,5 @@
 /// Odoo exceptions thrown by Odoo client
+library;
 
 /// Generic exception thrown on error coming from Odoo server.
 class OdooException implements Exception {
@@ -12,7 +13,7 @@ class OdooException implements Exception {
 
 /// Exception for session expired error.
 class OdooSessionExpiredException extends OdooException {
-  OdooSessionExpiredException(String message) : super(message);
+  OdooSessionExpiredException(super.message);
 
   @override
   String toString() => 'OdooSessionExpiredException: $message';
