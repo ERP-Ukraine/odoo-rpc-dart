@@ -1,4 +1,6 @@
 /// Odoo JSON-RPC Client for authentication and method calls.
+library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
@@ -180,7 +182,7 @@ class OdooClient {
     final uri = Uri.parse(baseURL + path);
     var body = json.encode({
       'jsonrpc': '2.0',
-      'method': 'funcName',
+      'method': funcName,
       'params': params,
       'id': sha1.convert(utf8.encode(DateTime.now().toString())).toString()
     });
