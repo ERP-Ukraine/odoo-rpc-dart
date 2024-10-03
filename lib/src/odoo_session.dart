@@ -12,6 +12,9 @@ class OdooSession {
   /// User's partner database id
   final int partnerId;
 
+  // TODO: add company, allowed, restricted https://github.com/odoo/odoo/blob/17.0/addons/web/models/ir_http.py#L141
+  // removed by https://github.com/ERP-Ukraine/odoo-rpc-dart/commit/1d688b50c79a1400d1aa9474b46e1d3854a35cfd
+
   /// User's login
   final String userLogin;
 
