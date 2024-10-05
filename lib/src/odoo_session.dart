@@ -142,7 +142,7 @@ class OdooSession {
       userId: json['userId'] as int,
       partnerId: json['partnerId'] as int,
       companyId: json['companyId'] as int,
-      allowedCompanies: json['allowedCompanies'] as List<Company>,
+      allowedCompanies: json['allowedCompanies'].cast<Company>(),
       userLogin: json['userLogin'] as String,
       userName: json['userName'] as String,
       userLang: json['userLang'] as String,

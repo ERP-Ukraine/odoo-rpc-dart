@@ -1,5 +1,9 @@
 # odoo_rpc changelog
 
+## 0.5.7
+
+Fixed type casting for allowedCompanies as list of Company records.
+
 ## 0.5.6
 
 Fixed the case for Odoo 11.0 when user_companies is false (single company mode).
