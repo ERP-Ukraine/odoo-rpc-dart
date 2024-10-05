@@ -76,7 +76,8 @@ class OdooSession {
       companyId = info['company_id'] as int? ?? 0;
     }
     // since Odoo 13.0
-    if (info.containsKey('user_companies')) {
+    if (info.containsKey('user_companies') &&
+        (info['user_companies'] is! bool)) {
       var sessionCurrentCompany = info['user_companies']['current_company'];
       if (sessionCurrentCompany is List) {
         // 12.0, 13.0, 14.0
