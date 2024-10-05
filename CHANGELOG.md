@@ -1,5 +1,10 @@
 # odoo_rpc changelog
 
+## 0.5.5
+
+Returned companyId to OdooSession.
+Added list of allowedCompanies as well.
+
 ## 0.5.4
 
 Removed companyId from OdooSession since it is not longer returned
