@@ -1,6 +1,11 @@
 /// Odoo Session Object
 library;
 
+typedef Company = ({
+  int id,
+  String name,
+});
+
 /// Represents session with Odoo server.
 class OdooSession {
   /// Current Session id
@@ -11,6 +16,12 @@ class OdooSession {
 
   /// User's partner database id
   final int partnerId;
+
+  /// User's company database id
+  final int companyId;
+
+  /// User's allowed companies (if supported by beckend)
+  final List<Company> allowedCompanies;
 
   /// User's login
   final String userLogin;
@@ -38,6 +49,8 @@ class OdooSession {
     required this.id,
     required this.userId,
     required this.partnerId,
+    required this.companyId,
+    required this.allowedCompanies,
     required this.userLogin,
     required this.userName,
     required this.userLang,
@@ -48,6 +61,7 @@ class OdooSession {
   });
 
   /// Creates [OdooSession] instance from odoo session info object.
+  /// See session_info() at web/models/ir_http.py
   static OdooSession fromSessionInfo(Map<String, dynamic> info) {
     final ctx = info['user_context'] as Map<String, dynamic>;
     List<dynamic> versionInfo;
@@ -55,10 +69,43 @@ class OdooSession {
     if (info.containsKey('server_version_info')) {
       versionInfo = info['server_version_info'];
     }
+
+    int companyId = 0;
+    List<Company> allowedCompanies = [];
+    if (info.containsKey('company_id')) {
+      companyId = info['company_id'] as int? ?? 0;
+    }
+    // since Odoo 13.0
+    if (info.containsKey('user_companies')) {
+      var sessionCurrentCompany = info['user_companies']['current_company'];
+      if (sessionCurrentCompany is List) {
+        // 12.0, 13.0, 14.0
+        companyId = sessionCurrentCompany[0] as int? ?? 0;
+      } else {
+        // Since 15.0
+        companyId = sessionCurrentCompany as int? ?? 0;
+      }
+
+      var sessionAllowedCompanies = info['user_companies']['allowed_companies'];
+      if (sessionAllowedCompanies is Map) {
+        // since 15.0
+        for (var e in sessionAllowedCompanies.values) {
+          allowedCompanies.add((id: e['id'] as int, name: e['name'] as String));
+        }
+      }
+      if (sessionAllowedCompanies is List) {
+        // 13.0 and 14.0
+        for (var e in sessionAllowedCompanies) {
+          allowedCompanies.add((id: e[0], name: e[1]));
+        }
+      }
+    }
     return OdooSession(
       id: info['id'] as String? ?? '',
       userId: info['uid'] as int,
       partnerId: info['partner_id'] as int,
+      companyId: companyId,
+      allowedCompanies: allowedCompanies,
       userLogin: info['username'] as String,
       userName: info['name'] as String,
       userLang: ctx['lang'] as String,
@@ -75,6 +122,8 @@ class OdooSession {
       'id': id,
       'userId': userId,
       'partnerId': partnerId,
+      'companyId': companyId,
+      'allowedCompanies': allowedCompanies,
       'userLogin': userLogin,
       'userName': userName,
       'userLang': userLang,
@@ -91,6 +140,8 @@ class OdooSession {
       id: json['id'] as String,
       userId: json['userId'] as int,
       partnerId: json['partnerId'] as int,
+      companyId: json['companyId'] as int,
+      allowedCompanies: json['allowedCompanies'] as List<Company>,
       userLogin: json['userLogin'] as String,
       userName: json['userName'] as String,
       userLang: json['userLang'] as String,
@@ -107,6 +158,8 @@ class OdooSession {
       id: newSessionId,
       userId: newSessionId == '' ? 0 : userId,
       partnerId: newSessionId == '' ? 0 : partnerId,
+      companyId: newSessionId == '' ? 0 : companyId,
+      allowedCompanies: newSessionId == '' ? [] : allowedCompanies,
       userLogin: newSessionId == '' ? '' : userLogin,
       userName: newSessionId == '' ? '' : userName,
       userLang: newSessionId == '' ? '' : userLang,

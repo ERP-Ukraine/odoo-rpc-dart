@@ -51,13 +51,13 @@ void main() async {
         'domain': [
           ['id', '=', uid]
         ],
-        'fields': ['id', 'name', '__last_update', imageField],
+        'fields': ['id', 'name', 'write_date', imageField],
       },
     });
     print('\nUser info: \n$res');
     // compute avatar url if we got reply
     if (res.length == 1) {
-      var unique = res[0]['__last_update'] as String;
+      var unique = res[0]['write_date'] as String;
       unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
       final userAvatar =
           '$baseUrl/web/image?model=res.user&field=$imageField&id=$uid&unique=$unique';
