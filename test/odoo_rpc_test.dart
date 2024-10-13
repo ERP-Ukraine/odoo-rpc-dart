@@ -17,8 +17,10 @@ class OdooSessionMatcher extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    return mismatchDescription.add("has actual emitted session = '${matchState['actual'].id}'");
+  Description describeMismatch(dynamic item, Description mismatchDescription,
+      Map<dynamic, dynamic> matchState, bool verbose) {
+    return mismatchDescription
+        .add("has actual emitted session = '${matchState['actual'].id}'");
   }
 
   @override
@@ -124,32 +126,39 @@ void main() {
   group('RPC Calls', () {
     test('Test initial session', () {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(200));
-      var client = OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      var client =
+          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
       expect(client.sessionId!.id, equals(initialSession.id));
     });
     test('Test refreshing session', () async {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(200));
 
-      var client = OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      var client =
+          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
 
       expect(client.sessionId!.id, equals(initialSession.id));
 
       final expectedSessionId = checksum('/some/path');
-      var expectForEvent = expectLater(client.sessionStream, emits(OdooSessionMatcher(expectedSessionId)));
+      var expectForEvent = expectLater(
+          client.sessionStream, emits(OdooSessionMatcher(expectedSessionId)));
       await client.callRPC('/some/path', 'funcName', {});
       expect(client.sessionId!.id, equals(expectedSessionId));
       await expectForEvent;
     });
     test('Test expired session exception', () {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(100));
-      var client = OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
-      expect(() async => await client.callRPC('/some/path', 'funcName', {}), throwsA(TypeMatcher<OdooSessionExpiredException>()));
+      var client =
+          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      expect(() async => await client.callRPC('/some/path', 'funcName', {}),
+          throwsA(TypeMatcher<OdooSessionExpiredException>()));
     });
 
     test('Test server error exception', () {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(500));
-      var client = OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
-      expect(() async => await client.callRPC('/some/path', 'funcName', {}), throwsA(TypeMatcher<OdooException>()));
+      var client =
+          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      expect(() async => await client.callRPC('/some/path', 'funcName', {}),
+          throwsA(TypeMatcher<OdooException>()));
     });
   });
 
