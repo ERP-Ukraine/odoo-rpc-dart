@@ -1,5 +1,9 @@
 # odoo_rpc changelog
 
+## 0.5.8
+
+Fixed OdooSession serialization issue.
+
 ## 0.5.7
 
 Fixed type casting for allowedCompanies as list of Company records.

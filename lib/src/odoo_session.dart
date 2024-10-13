@@ -1,10 +1,43 @@
 /// Odoo Session Object
 library;
 
-typedef Company = ({
-  int id,
-  String name,
-});
+/// Represents compnay in odooSession.
+class Company {
+  int id;
+  String name;
+
+  Company({required this.id, required this.name});
+
+  /// Stores [Company] to JSON
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'name': name};
+  }
+
+  /// Restore [Company] from JSON
+  static Company fromJson(Map<String, dynamic> json) {
+    return Company(
+      id: json['id'] as int,
+      name: json['name'] as String,
+    );
+  }
+
+  static List<Company> fromJsonList(List<Map<String, dynamic>> jsonList) {
+    return jsonList.map((item) => Company.fromJson(item)).toList();
+  }
+
+  static List<Map<String, dynamic>> toJsonList(List<Company> companies) {
+    return companies.map((item) => item.toJson()).toList();
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is Company) {
+      return id == other.id && name == other.name;
+    }
+    return false;
+  }
+}
+
 
 /// Represents session with Odoo server.
 class OdooSession {
@@ -76,8 +109,7 @@ class OdooSession {
       companyId = info['company_id'] as int? ?? 0;
     }
     // since Odoo 13.0
-    if (info.containsKey('user_companies') &&
-        (info['user_companies'] is! bool)) {
+    if (info.containsKey('user_companies') && (info['user_companies'] is! bool)) {
       var sessionCurrentCompany = info['user_companies']['current_company'];
       if (sessionCurrentCompany is List) {
         // 12.0, 13.0, 14.0
@@ -91,13 +123,13 @@ class OdooSession {
       if (sessionAllowedCompanies is Map) {
         // since 15.0
         for (var e in sessionAllowedCompanies.values) {
-          allowedCompanies.add((id: e['id'] as int, name: e['name'] as String));
+          allowedCompanies.add(Company(id: e['id'] as int, name: e['name'] as String));
         }
       }
       if (sessionAllowedCompanies is List) {
         // 13.0 and 14.0
         for (var e in sessionAllowedCompanies) {
-          allowedCompanies.add((id: e[0], name: e[1]));
+          allowedCompanies.add(Company(id: e[0], name: e[1]));
         }
       }
     }
@@ -124,7 +156,7 @@ class OdooSession {
       'userId': userId,
       'partnerId': partnerId,
       'companyId': companyId,
-      'allowedCompanies': allowedCompanies,
+      'allowedCompanies': Company.toJsonList(allowedCompanies),
       'userLogin': userLogin,
       'userName': userName,
       'userLang': userLang,
@@ -142,7 +174,7 @@ class OdooSession {
       userId: json['userId'] as int,
       partnerId: json['partnerId'] as int,
       companyId: json['companyId'] as int,
-      allowedCompanies: json['allowedCompanies'].cast<Company>(),
+      allowedCompanies: Company.fromJsonList(List<Map<String, dynamic>>.from(json['allowedCompanies'])),
       userLogin: json['userLogin'] as String,
       userName: json['userName'] as String,
       userLang: json['userLang'] as String,
@@ -178,9 +210,7 @@ class OdooSession {
   /// ```
   int get serverVersionInt {
     // Take last two chars for name like 'saas~14'
-    final serverVersionSanitized = serverVersion.length == 1
-        ? serverVersion
-        : serverVersion.substring(serverVersion.length - 2);
+    final serverVersionSanitized = serverVersion.length == 1 ? serverVersion : serverVersion.substring(serverVersion.length - 2);
     return int.tryParse(serverVersionSanitized) ?? -1;
   }
 
