@@ -18,7 +18,7 @@ To use this plugin, add odoo_rpc as a dependency in your pubspec.yaml file. For 
 
 ```yaml
 dependencies:
-  odoo_rpc: ^0.4.5
+  odoo_rpc: <latest_version>
 ```
 
 ## Examples
@@ -59,7 +59,7 @@ sessionChanged(OdooSession sessionId) async {
 
 main() async {
   var prev_session = restore_session_somehow();
-  var client = OdooClient("https://my-db.odoo.com", prev_session);
+  var client = OdooClient("https://my-db.odoo.com", sessionId: prev_session);
 
   // Subscribe to session changes to store most recent one
   var subscription = client.sessionStream.listen(sessionChanged);
