@@ -179,6 +179,29 @@ However RPC calls via web client (dart js) that is hosted on separate domain wil
 due to CORS requests currently are not correctly handled by Odoo.
 See [https://github.com/odoo/odoo/pull/37853](https://github.com/odoo/odoo/pull/37853) for the details.
 
+To make it work from different host we must follow the rules of CORS.
+Make sure your odoo server has these CORS headers:
+
+```
+Access-Control-Allow-Methods: GET, OPTIONS, PUT, POST
+Access-Control-Allow-Headers: Content-Type
+Access-Control-Allow-Origin: https://{YOUR_FLUTTER_APP_DOMAIN}
+Access-Control-Allow-Credentials: true // This is super important
+
+```
+
+And for WebApp you must use `BrowserClient` or something similar. The withCredentials = true is crucial. It allows the httpClient to carry on cookies from Browser. On Web browser, it won't allow you to directly access `set-cookie` header. As it is a forbidden header: https://fetch.spec.whatwg.org/#forbidden-request-header But it will automatically add this cookie to the `BrowserClient` whenever you make rpc call to your odoo server once authenticated.
+
+```dart
+OdooClient(BASE_URL,
+  sessionId: ODOO_SESSION,
+  httpClient: BrowserClient()..withCredentials = true,
+  isWebPlatform = true,
+)
+```
+
+For Web always listen to `loginStream` stream in order to get if user logged in or logged out. As session_id will be unaccesible on Web platform.
+
 ## Issues
 
 Please file any issues, bugs or feature requests as an issue on our [GitHub](https://github.com/ERP-Ukraine/odoo-rpc-dart/issues) page.
