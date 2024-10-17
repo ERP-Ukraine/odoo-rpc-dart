@@ -1,5 +1,13 @@
 # odoo_rpc changelog
 
+## 0.6.0
+
+- Add isWebPlatform flag to OdooClient constructor
+- Implement web-specific login and logout methods
+- Modify RPC call to handle web platform differently
+- Update authentication process for web platform
+- Improve session management and error handling
+
 ## 0.5.8
 
 Fixed OdooSession serialization issue.

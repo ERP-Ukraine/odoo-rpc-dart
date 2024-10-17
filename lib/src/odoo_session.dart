@@ -171,7 +171,7 @@ class OdooSession {
   /// Restore [OdooSession] from JSON
   static OdooSession fromJson(Map<String, dynamic> json) {
     return OdooSession(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       userId: json['userId'] as int,
       partnerId: json['partnerId'] as int,
       companyId: json['companyId'] as int,

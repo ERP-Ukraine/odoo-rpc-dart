@@ -126,15 +126,21 @@ void main() {
   group('RPC Calls', () {
     test('Test initial session', () {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(200));
-      var client =
-          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      var client = OdooClient(
+        'https://demo.erp.co.ua',
+        sessionId: initialSession,
+        httpClient: mockHttpClient,
+      );
       expect(client.sessionId!.id, equals(initialSession.id));
     });
     test('Test refreshing session', () async {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(200));
 
-      var client =
-          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      var client = OdooClient(
+        'https://demo.erp.co.ua',
+        sessionId: initialSession,
+        httpClient: mockHttpClient,
+      );
 
       expect(client.sessionId!.id, equals(initialSession.id));
 
@@ -147,16 +153,22 @@ void main() {
     });
     test('Test expired session exception', () {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(100));
-      var client =
-          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      var client = OdooClient(
+        'https://demo.erp.co.ua',
+        sessionId: initialSession,
+        httpClient: mockHttpClient,
+      );
       expect(() async => await client.callRPC('/some/path', 'funcName', {}),
           throwsA(TypeMatcher<OdooSessionExpiredException>()));
     });
 
     test('Test server error exception', () {
       var mockHttpClient = http_testing.MockClient(getFakeRequestHandler(500));
-      var client =
-          OdooClient('https://demo.erp.co.ua', initialSession, mockHttpClient);
+      var client = OdooClient(
+        'https://demo.erp.co.ua',
+        sessionId: initialSession,
+        httpClient: mockHttpClient,
+      );
       expect(() async => await client.callRPC('/some/path', 'funcName', {}),
           throwsA(TypeMatcher<OdooException>()));
     });
