@@ -51,12 +51,24 @@ class OdooClient {
   /// Could be overridden for tests or custom client configuration.
   late http.BaseClient httpClient;
 
+  /// Add a flag to check if we're on web platform.
+  /// [kIsWeb] can be used to indicate if we're on web platform.
+  final bool isWebPlatform;
+
   /// Instantiates [OdooClient] with given Odoo server URL.
   /// Optionally accepts [sessionId] to reuse existing session.
   /// It is possible to pass own [httpClient] inherited
   /// from [http.BaseClient] to override default one.
-  OdooClient(String baseURL,
-      [OdooSession? sessionId, http.BaseClient? httpClient]) {
+  OdooClient(
+    String baseURL, {
+    OdooSession? sessionId,
+
+    /// Pass BrowserClient()..withCredentials = true for web platform in order to send cookies via cross-origin requests.
+    /// Otherwise on web platform [httpClient] will be [http.Client] which doesn't send cookies stored in browser.
+    /// Hence it will not work for Odoo web apps which requires cookie auth.
+    http.BaseClient? httpClient,
+    this.isWebPlatform = false,
+  }) {
     // Restore previous session
     _sessionId = sessionId;
     // Take or init HTTP client
@@ -105,6 +117,26 @@ class OdooClient {
   /// Frees HTTP client resources
   void close() {
     httpClient.close();
+  }
+
+  void _webLogin() {
+    if (_loginStreamActive) {
+      _loginStreamController.add(OdooLoginEvent.loggedIn);
+    }
+  }
+
+  void _webLogout() {
+    if (_loginStreamActive) {
+      _loginStreamController.add(OdooLoginEvent.loggedOut);
+    }
+  }
+
+  void _logout() {
+    if (isWebPlatform) {
+      _webLogout();
+    } else {
+      _setSessionId('');
+    }
   }
 
   void _setSessionId(String newSessionId, {bool auth = false}) {
@@ -163,20 +195,20 @@ class OdooClient {
   /// Low Level RPC call.
   /// It has to be used on all Odoo Controllers with type='json'
   Future<dynamic> callRPC(path, funcName, params) async {
-    var headers = {'Content-type': 'application/json'};
-    var cookie = '';
-    if (_sessionId != null) {
-      cookie = 'session_id=${_sessionId!.id}';
-    }
-    if (frontendLang.isNotEmpty) {
-      if (cookie.isEmpty) {
-        cookie = 'frontend_lang=$frontendLang';
-      } else {
-        cookie += '; frontend_lang=$frontendLang';
+    var headers = {'Content-Type': 'application/json'};
+
+    if (!isWebPlatform) {
+      // Only set the Cookie header for non-web platforms
+      var cookie = '';
+      if (_sessionId != null) {
+        cookie = 'session_id=${_sessionId!.id}';
       }
-    }
-    if (cookie.isNotEmpty) {
-      headers['Cookie'] = cookie;
+      if (frontendLang.isNotEmpty) {
+        cookie += '${cookie.isEmpty ? '' : '; '}frontend_lang=$frontendLang';
+      }
+      if (cookie.isNotEmpty) {
+        headers['Cookie'] = cookie;
+      }
     }
 
     final uri = Uri.parse(baseURL + path);
@@ -191,12 +223,15 @@ class OdooClient {
       if (_inRequestStreamActive) _inRequestStreamController.add(true);
       final response = await httpClient.post(uri, body: body, headers: headers);
 
-      _updateSessionIdFromCookies(response);
+      if (!isWebPlatform) {
+        _updateSessionIdFromCookies(response);
+      }
+
       var result = json.decode(response.body);
       if (result['error'] != null) {
         if (result['error']['code'] == 100) {
           // session expired
-          _setSessionId('');
+          _logout();
           final err = result['error'].toString();
           throw OdooSessionExpiredException(err);
         } else {
@@ -228,7 +263,7 @@ class OdooClient {
   Future<OdooSession> authenticate(
       String db, String login, String password) async {
     final params = {'db': db, 'login': login, 'password': password};
-    const headers = {'Content-type': 'application/json'};
+    const headers = {'Content-Type': 'application/json'};
     final uri = Uri.parse('$baseURL/web/session/authenticate');
     final body = json.encode({
       'jsonrpc': '2.0',
@@ -244,7 +279,7 @@ class OdooClient {
       if (result['error'] != null) {
         if (result['error']['code'] == 100) {
           // session expired
-          _setSessionId('');
+          _logout();
           final err = result['error'].toString();
           throw OdooSessionExpiredException(err);
         } else {
@@ -261,8 +296,15 @@ class OdooClient {
       }
 
       _sessionId = OdooSession.fromSessionInfo(result['result']);
-      // It will notify subscribers
-      _updateSessionIdFromCookies(response, auth: true);
+      if (isWebPlatform) {
+        // For web platform, consider authentication successful if we reach here as browser won't allow us to read cookies
+        // Due to cross-origin restrictions. https://fetch.spec.whatwg.org/#forbidden-request-header
+
+        _webLogin();
+      } else {
+        // It will notify subscribers
+        _updateSessionIdFromCookies(response, auth: true);
+      }
 
       if (_inRequestStreamActive) _inRequestStreamController.add(false);
       return _sessionId!;
@@ -278,12 +320,12 @@ class OdooClient {
       await callRPC('/web/session/destroy', 'call', {});
       // RPC call sets expired session.
       // Need to overwrite it.
-      _setSessionId('');
+      _logout();
     } on Exception {
       // If session is not cleared due to
       // unknown error - clear it locally.
       // Remote session will expire on its own.
-      _setSessionId('');
+      _logout();
     }
   }
 
