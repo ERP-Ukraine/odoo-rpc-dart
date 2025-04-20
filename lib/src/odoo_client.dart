@@ -187,7 +187,7 @@ class OdooClient {
           _setSessionId(cookie.value, auth: auth);
         }
       } catch (e) {
-        throw OdooException(e.toString());
+        throw OdooException(e);
       }
     }
   }
@@ -232,11 +232,11 @@ class OdooClient {
         if (result['error']['code'] == 100) {
           // session expired
           _logout();
-          final err = result['error'].toString();
+          final err = result['error'];
           throw OdooSessionExpiredException(err);
         } else {
           // Other error
-          final err = result['error'].toString();
+          final err = result['error'];
           throw OdooException(err);
         }
       }
@@ -280,11 +280,11 @@ class OdooClient {
         if (result['error']['code'] == 100) {
           // session expired
           _logout();
-          final err = result['error'].toString();
+          final err = result['error'];
           throw OdooSessionExpiredException(err);
         } else {
           // Other error
-          final err = result['error'].toString();
+          final err = result['error'];
           throw OdooException(err);
         }
       }
