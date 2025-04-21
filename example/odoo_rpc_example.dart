@@ -88,6 +88,22 @@ void main() async {
       'kwargs': {},
     });
 
+    // Call invalid method to test error handling
+    try {
+      await client.callKw({
+        'model': 'example.model',
+        'method': 'example',
+        'args': [],
+        'kwargs': {},
+      });
+    } on OdooException catch (e) {
+      if (e.error is Map) {
+        Map error = e.error as Map;
+        print(error['code']);
+        print(error['message']);
+      }
+    }
+
     // Get list of installed modules
     res = await client.callRPC('/web/session/modules', 'call', {});
     print('\nInstalled modules: \n$res');

@@ -1,5 +1,9 @@
 # odoo_rpc changelog
 
+## 0.7.0
+
+Add `error` field to `OdooException` class.
+
 ## 0.6.0
 
 - Add isWebPlatform flag to OdooClient constructor
