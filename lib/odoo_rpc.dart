@@ -1,4 +1,4 @@
-library odoo_rpc;
+library;
 
 export 'src/odoo_client.dart';
 export 'src/odoo_exceptions.dart';

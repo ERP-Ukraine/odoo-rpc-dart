@@ -1,5 +1,9 @@
 # odoo_rpc changelog
 
+## 0.7.1
+
+Fix parsion Odoo Session from JSON for older Odoo versions without allowedCompanies list.
+
 ## 0.7.0
 
 Add `error` field to `OdooException` class.

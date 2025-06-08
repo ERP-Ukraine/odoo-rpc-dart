@@ -176,7 +176,7 @@ class OdooSession {
       partnerId: json['partnerId'] as int,
       companyId: json['companyId'] as int,
       allowedCompanies: Company.fromJsonList(
-          List<Map<String, dynamic>>.from(json['allowedCompanies'])),
+          List<Map<String, dynamic>>.from(json['allowedCompanies'] ?? [])),
       userLogin: json['userLogin'] as String,
       userName: json['userName'] as String,
       userLang: json['userLang'] as String,
